@@ -1,0 +1,79 @@
+name: friday-commerce
+
+networks:
+  friday-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  mysql-conf:
+  redis-data:
+
+services:
+  mysql:
+    image: mysql:8.0.43
+    container_name: friday-mysql
+    restart: unless-stopped
+    ports:
+      - "3333:3306"              # ← application.yml 의 localhost:3307 과 일치
+    environment:
+      MYSQL_DATABASE: commerce  # ← DB 이름 매칭
+      MYSQL_USER: ${RDS_USERNAME:-local}
+      MYSQL_PASSWORD: ${RDS_PASSWORD:-local}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      TZ: Asia/Seoul
+    command: [
+      "--disable-log-bin",                # dev: binlog 끔(디스크 절약)
+      "--character-set-server=utf8mb4",
+      "--collation-server=utf8mb4_0900_ai_ci",
+      "--default-time-zone=+09:00",       # tz 테이블 없이도 고정
+      "--skip-name-resolve",              # DNS 역조회 비활성화 → 접속 지연 방지
+      "--max-connections=150",
+      "--innodb-buffer-pool-size=256M",
+      "--innodb-log-file-size=128M"
+    ]
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u${MYSQL_USER:-local} -p${MYSQL_PASSWORD:-local} --silent" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+    volumes:
+      - mysql-data:/var/lib/mysql                         # 데이터 영속화
+      - ./mysql/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf:ro # 추가 설정 (옵션)
+      # - ./mysql/init:/docker-entrypoint-initdb.d:ro     # 초기 스크립트 (원하면 사용)
+    networks:
+      - friday-net
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: friday-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"        # spring.data.redis.host=localhost, port=6379 매칭
+    environment:
+      TZ: Asia/Seoul
+      # 선택: 비밀번호 / 메모리 상한 / eviction 정책 (없으면 기본값 사용)
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}          # ""면 인증 미사용
+      REDIS_MAXMEMORY: ${REDIS_MAXMEMORY:-512mb}   # 개발 기본 512MB
+      REDIS_MAXMEMORY_POLICY: ${REDIS_MAXMEMORY_POLICY:-allkeys-lru}
+    # 읽기 쉬운 설정은 conf 파일로, 바꿔야 할 건 env로 오버라이드
+    command: >
+      sh -c 'exec redis-server /usr/local/etc/redis/redis.conf
+             --appendonly yes
+             --appendfsync everysec
+             --save 900 1 --save 300 10 --save 60 10000
+             --maxmemory ${REDIS_MAXMEMORY:-512mb}
+             --maxmemory-policy ${REDIS_MAXMEMORY_POLICY:-allkeys-lru}
+             ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}'
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -h 127.0.0.1 -p 6379 ${REDIS_PASSWORD:+-a $REDIS_PASSWORD} ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    volumes:
+      - redis-data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - friday-net
