@@ -97,3 +97,9 @@ logging:
     org.springframework.orm.jpa: INFO
     com.zaxxer.hikari.HikariConfig: INFO
     com.zaxxer.hikari: DEBUG
+
+snowflake:
+  epoch-millis: ${SNOWFLAKE_EPOCH_MILLIS}             # 2025-09-22T00:00:00Z
+  node-id: ${SNOWFLAKE_NODE_ID}                       # 각 인스턴스/노드별 고유 값 할당
+  clock-skew-tolerance-millis: ${SNOWFLAKE_CLOCK_SKEW_TOLERANCE_MILLIS}  # 5~20 권장
+  auto-detect-node-id: ${SNOWFLAKE_AUTO_DETECT_NODE_ID}       # 운영에선 명시 지정 권장
