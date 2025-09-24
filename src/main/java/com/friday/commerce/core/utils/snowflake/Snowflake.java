@@ -83,6 +83,7 @@ public final class Snowflake {
             long next = (sequence + 1) & MAX_SEQUENCE;
             if (next == 0) { // overflow → 다음 밀리초까지 대기
                 now = waitUntil(lastTimestamp + 1);
+                sequence = 0;
             } else {
                 sequence = next;
             }
