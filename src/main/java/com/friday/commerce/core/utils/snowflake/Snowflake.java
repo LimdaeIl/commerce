@@ -28,7 +28,7 @@ public final class Snowflake {
     private static final int NODE_SHIFT = SEQUENCE_BITS;                               // 12
     private static final int TIMESTAMP_SHIFT = NODE_ID_BITS + SEQUENCE_BITS;           // 22
 
-    private final long epochMillis;                 // e.g. 2024-01-01T00:00:00Z = 1704067200000L
+    private final long epochMillis;                 // e.g. 2025-09-22T00:00:00Z = 1758499200000L
     private final long nodeId;                      // 0..1023
     private final long clockSkewToleranceMillis;    // e.g. 5~50ms
 
@@ -57,10 +57,10 @@ public final class Snowflake {
     }
 
     /**
-     * 기본값: epoch=2024-01-01T00:00:00Z, nodeId=0, tolerance=10ms
+     * 기본값: epoch=2025-09-22T00:00:00Z, nodeId=0, tolerance=10ms
      */
     public Snowflake() {
-        this(1704067200000L, 0L, 10L);
+        this(1758499200000L, 0L, 10L);
     }
 
     /**
