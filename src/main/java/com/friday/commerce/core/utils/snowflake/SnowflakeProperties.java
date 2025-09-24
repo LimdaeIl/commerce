@@ -11,7 +11,7 @@ class SnowflakeProperties {
     /**
      * UTC epoch in millis (default: 2025-09-22T00:00:00Z)
      */
-    private long epochMillis = 1704067200000L;
+    private long epochMillis = 1758499200000L;
 
     /**
      * Node ID (0..1023). 미지정 시 autoDetectNodeId=true면 추론.

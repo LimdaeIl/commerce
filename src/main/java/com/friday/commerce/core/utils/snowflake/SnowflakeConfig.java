@@ -10,9 +10,18 @@ class SnowflakeConfig {
 
     @Bean
     public Snowflake snowflake(SnowflakeProperties props) {
-        long node = (props.getNodeId() != null)
-                ? props.getNodeId()
-                : (props.isAutoDetectNodeId() ? Snowflake.inferNodeId() : 0L);
+        Long configured = props.getNodeId();
+
+        final long node;
+
+        if (configured != null) {
+            node = configured;
+        } else if (props.isAutoDetectNodeId()) {
+            node = Snowflake.inferNodeId();
+        } else {
+            throw new IllegalStateException(
+                    "snowflake.node-id must be set when auto-detect-node-id=false");
+        }
 
         return new Snowflake(
                 props.getEpochMillis(),
