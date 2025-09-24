@@ -1,8 +1,6 @@
 package com.friday.commerce.core.utils.snowflake;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
@@ -11,7 +9,7 @@ class SnowflakeProperties {
 
     // getters/setters
     /**
-     * UTC epoch in millis (default: 2024-01-01T00:00:00Z)
+     * UTC epoch in millis (default: 2025-09-22T00:00:00Z)
      */
     private long epochMillis = 1704067200000L;
 
