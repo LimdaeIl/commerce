@@ -22,7 +22,11 @@ public enum UserErrorCode implements ErrorCode {
     EMAIL_VERIFICATION_COOLTIME(HttpStatus.TOO_MANY_REQUESTS, "이메일 인증: 재요청 대기 시간입니다."),
     EMAIL_VERIFICATION_BLOCKED(HttpStatus.FORBIDDEN, "이메일 인증: 시도 횟수 초과로 잠시 차단되었습니다."),
     EMAIL_VERIFICATION_NOT_REQUESTED(HttpStatus.BAD_REQUEST, "이메일 인증: 먼저 인증 코드를 요청해 주세요."),
-    EMAIL_VERIFY_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "이메일 인증: 인증 코드가 일치하지 않습니다.");
+    EMAIL_VERIFY_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "이메일 인증: 인증 코드가 일치하지 않습니다."),
+
+    AGREEMENT_TERMS_OF_SERVICE(HttpStatus.BAD_REQUEST, "동의: 서비스 동의 승인은 필수 입니다."),
+    AGREEMENT_PRIVACY(HttpStatus.BAD_REQUEST, "동의: 개인정보 동의 승인은 필수 입니다."),
+    AGREEMENT_MARKETING(HttpStatus.BAD_REQUEST, "동의: 마케팅 활용 동의 승인은 필수 입니다.");
 
     private final HttpStatus status;
     private final String message;
