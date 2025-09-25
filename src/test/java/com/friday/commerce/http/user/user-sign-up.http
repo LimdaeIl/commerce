@@ -1,0 +1,104 @@
+@baseUrl = http://localhost:10000
+@contentType = application/json
+
+### @name SignUp_Success
+# 정상 회원가입 시나리오
+POST {{baseUrl}}/api/v1/auth/sign-up
+Content-Type: {{contentType}}
+Accept: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "Aa!23456",
+  "username": "앨리스123",
+  "agreement": {
+    "termsOfService": true,
+    "privacy": true,
+    "marketing": true
+  },
+  "address": {
+    "zipCode": "06236",
+    "addressLine1": "서울시 강남구 테헤란로 123",
+    "addressLine2": "OO빌딩 5층",
+    "city": "서울",
+    "state": "강남구"
+  }
+}
+
+###
+
+### @name SignUp_Fail_InvalidEmail
+# 실패: 이메일 형식이 유효하지 않음
+POST {{baseUrl}}/api/v1/auth/sign-up
+Content-Type: {{contentType}}
+Accept: application/json
+
+{
+  "email": "not-an-email",
+  "password": "Aa!23456",
+  "username": "유저",
+  "agreement": {
+    "termsOfService": true,
+    "privacy": true,
+    "marketing": false
+  },
+  "address": {
+    "zipCode": "06236",
+    "addressLine1": "주소1",
+    "addressLine2": "",
+    "city": "서울",
+    "state": "강남구"
+  }
+}
+
+###
+
+### @name SignUp_Fail_WeakPassword
+# 실패: 비밀번호에 숫자/특수문자가 포함되지 않음
+POST {{baseUrl}}/api/v1/auth/sign-up
+Content-Type: {{contentType}}
+Accept: application/json
+
+{
+  "email": "bob@example.com",
+  "password": "onlyletters",
+  "username": "밥",
+  "agreement": {
+    "termsOfService": true,
+    "privacy": true,
+    "marketing": false
+  },
+  "address": {
+    "zipCode": "06236",
+    "addressLine1": "주소1",
+    "addressLine2": "",
+    "city": "서울",
+    "state": "강남구"
+  }
+}
+
+###
+
+### @name SignUp_Fail_TermsNotAgreed
+# 실패: 필수 동의(termsOfService) 미동의 + 우편번호 형식 오류 + 주소 필수값 누락
+POST {{baseUrl}}/api/v1/auth/sign-up
+Content-Type: {{contentType}}
+Accept: application/json
+
+{
+  "email": "carol@example.com",
+  "password": "Aa!23456",
+  "username": "캐롤",
+  "agreement": {
+    "termsOfService": false,
+    "privacy": true,
+    "marketing": true
+  },
+  "address": {
+    "zipCode": "0623",
+    "addressLine1": "",
+    "addressLine2": "",
+    "city": "",
+    "state": ""
+  }
+}

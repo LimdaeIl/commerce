@@ -39,11 +39,8 @@ public class User {
     @Column(name = "username", nullable = false, length = 100)
     private String username;
 
-    @Column(name = "phone", nullable = false, length = 11)
-    private String phone;
-
     @Embedded
-    private Agreement agreement;
+    private UserAgreement userAgreement;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "order_index")
@@ -97,17 +94,15 @@ public class User {
             String email,
             String password,
             String username,
-            String phone,
-            Agreement agreement,
-            List<UserAddress> userAddresses
+            UserAgreement userAgreement,
+            UserAddress userAddresses
     ) {
         LocalDateTime now = LocalDateTime.now();
         this.userId = userId;
         this.email = email;
         this.password = password;
         this.username = username;
-        this.phone = phone;
-        this.agreement = agreement;
+        this.userAgreement = userAgreement;
         this.createdAt = now;
         this.updatedAt = null;
         this.updatedBy = null;
@@ -115,7 +110,7 @@ public class User {
         this.deletedBy = null;
 
         if (userAddresses != null) {
-            userAddresses.forEach(this::addAddress); // 양방향 세팅
+            addAddress(userAddresses);
         }
     }
 
@@ -124,17 +119,15 @@ public class User {
             String email,
             String password,
             String username,
-            String phone,
-            Agreement agreement,
-            List<UserAddress> userAddresses
+            UserAgreement userAgreement,
+            UserAddress userAddresses
     ) {
         return User.builder()
                 .userId(userId)
                 .email(email)
                 .password(password)
                 .username(username)
-                .phone(phone)
-                .agreement(agreement)
+                .userAgreement(userAgreement)
                 .userAddresses(userAddresses)
                 .build();
     }
@@ -144,7 +137,7 @@ public class User {
             return;
         }
         this.userAddresses.add(address);
-        address.setUser(this); // 연관 주인 쪽 세팅
+        address.setUser(this);
     }
 
     public void removeAddress(UserAddress address) {
