@@ -69,7 +69,7 @@ public class UserAddress {
         this.addressLine2 = addressLine2;
         this.city = city;
         this.state = state;
-        this.isDefault = (isDefault != null) ? isDefault : Boolean.FALSE;
+        this.isDefault = (isDefault != null) ? isDefault : Boolean.TRUE;
     }
 
     public static UserAddress create(
@@ -77,8 +77,7 @@ public class UserAddress {
             String addressLine1,
             String addressLine2,
             String city,
-            String state,
-            Boolean isDefault
+            String state
     ) {
         return UserAddress.builder()
                 .zipCode(zipCode)
@@ -86,7 +85,6 @@ public class UserAddress {
                 .addressLine2(addressLine2)
                 .city(city)
                 .state(state)
-                .isDefault(isDefault)
                 .build();
     }
 

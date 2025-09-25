@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Embeddable
-public class Agreement {
+public class UserAgreement {
 
     @Column(name = "agree_terms", nullable = false)
     private boolean termsOfService = Boolean.FALSE;
@@ -31,11 +31,11 @@ public class Agreement {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Agreement agreement = (Agreement) o;
-        return termsOfService == agreement.termsOfService
-                && privacy == agreement.privacy
-                && marketing == agreement.marketing
-                && Objects.equals(agreedAt, agreement.agreedAt);
+        UserAgreement serviceAgreement = (UserAgreement) o;
+        return termsOfService == serviceAgreement.termsOfService
+                && privacy == serviceAgreement.privacy
+                && marketing == serviceAgreement.marketing
+                && Objects.equals(agreedAt, serviceAgreement.agreedAt);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class Agreement {
     }
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Agreement(
+    private UserAgreement(
             Boolean termsOfService,
             Boolean privacy,
             Boolean marketing
@@ -55,12 +55,12 @@ public class Agreement {
         this.agreedAt = LocalDateTime.now();
     }
 
-    public static Agreement create(
+    public static UserAgreement create(
             Boolean termsOfService,
             Boolean privacy,
             Boolean marketing
     ) {
-        return Agreement.builder()
+        return UserAgreement.builder()
                 .termsOfService(termsOfService)
                 .privacy(privacy)
                 .marketing(marketing)
