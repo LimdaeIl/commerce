@@ -2,7 +2,6 @@ package com.friday.commerce.user.application.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -65,7 +64,6 @@ public record SignUpRequest(
 
     public record Agreement(
             @NotNull(message = "이용약관 동의는 필수입니다.")
-            @AssertTrue(message = "이용약관에 동의해야 회원가입이 가능합니다.")
             Boolean termsOfService,
 
             @NotNull(message = "개인정보 처리방침 동의는 필수입니다.")

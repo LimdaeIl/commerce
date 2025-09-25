@@ -40,7 +40,7 @@ public class User {
     private String username;
 
     @Embedded
-    private UserAgreement useragreement;
+    private UserAgreement userAgreement;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "order_index")
@@ -94,7 +94,7 @@ public class User {
             String email,
             String password,
             String username,
-            UserAgreement useragreement,
+            UserAgreement userAgreement,
             UserAddress userAddresses
     ) {
         LocalDateTime now = LocalDateTime.now();
@@ -102,7 +102,7 @@ public class User {
         this.email = email;
         this.password = password;
         this.username = username;
-        this.useragreement = useragreement;
+        this.userAgreement = userAgreement;
         this.createdAt = now;
         this.updatedAt = null;
         this.updatedBy = null;
@@ -119,7 +119,7 @@ public class User {
             String email,
             String password,
             String username,
-            UserAgreement useragreement,
+            UserAgreement userAgreement,
             UserAddress userAddresses
     ) {
         return User.builder()
@@ -127,7 +127,7 @@ public class User {
                 .email(email)
                 .password(password)
                 .username(username)
-                .useragreement(useragreement)
+                .userAgreement(userAgreement)
                 .userAddresses(userAddresses)
                 .build();
     }

@@ -3,7 +3,7 @@ package com.friday.commerce.user.domain.repository;
 import com.friday.commerce.user.domain.entity.User;
 import java.util.Optional;
 
-public interface JpaUserRepository {
+public interface UserRepository {
 
     Optional<User> findByEmail(String email);
 

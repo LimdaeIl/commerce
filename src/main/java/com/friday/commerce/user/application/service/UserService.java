@@ -10,7 +10,7 @@ import com.friday.commerce.user.domain.entity.UserAddress;
 import com.friday.commerce.user.domain.entity.UserAgreement;
 import com.friday.commerce.user.domain.exception.UserErrorCode;
 import com.friday.commerce.user.domain.exception.UserException;
-import com.friday.commerce.user.domain.repository.JpaUserRepository;
+import com.friday.commerce.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,7 +24,7 @@ class UserService implements UserUseCase {
 
     private final Snowflake snowflake;
     private final PasswordEncoder passwordEncoder;
-    private final JpaUserRepository userRepository;
+    private final UserRepository userRepository;
 
 
     private void verifyAgreement(Agreement agreement) {
