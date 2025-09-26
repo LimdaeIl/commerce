@@ -92,7 +92,7 @@ class UserService implements UserUseCase {
                 request.address().addressLine2(),
                 request.address().city(),
                 request.address().state()
-                );
+        );
 
         User user = User.create(
                 snowflake.nextId(),
@@ -101,7 +101,7 @@ class UserService implements UserUseCase {
                 request.username(),
                 userAgreement,
                 userAddress
-                );
+        );
 
         User savedUser = userRepository.save(user);
 
@@ -121,16 +121,16 @@ class UserService implements UserUseCase {
 
         // 3) jti/TTL 산출
         String rtJtl = tokenProvider.getJti(rt);
-        long atTtlMs = tokenProvider.getTtlMs(at);
-        long rtTtlMs = tokenProvider.getTtlMs(rt);
-
+        long atTtlMs = tokenProvider.getAtTtlMs(at);
+        long rtTtlMs = tokenProvider.getRtTtlMs(rt);
 
         // 4) RT를 Hash로 저장
-        userCacheRepository.saveRefreshToken(user.getUserId(), rtJtl, rt, rtTtlMs);
+        userCacheRepository.saveToken(user.getUserId(), rtJtl, rtTtlMs);
 
         // 5) 응답
-        return SignInResponse.of(user, at, rt,  atTtlMs, rtTtlMs);
+        return SignInResponse.of(user, at, rt, atTtlMs, rtTtlMs);
     }
+
 
 
 }

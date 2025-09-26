@@ -28,7 +28,14 @@ public class CoreJwtTokenProvider implements TokenProvider {
     }
 
     @Override
-    public long getTtlMs(String token) {
-        return jwtProvider.getTtlMs(token);
+    public long getRtTtlMs(String rt) {
+        return jwtProvider.getRtTtlMs(rt);
     }
+
+    @Override
+    public long getAtTtlMs(String at) {
+        return jwtProvider.getAtTtlMs(at);
+    }
+
+
 }

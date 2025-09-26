@@ -35,13 +35,12 @@ public class RedisUserCacheRepository implements UserCacheRepository {
 
 
     @Override
-    public void saveRefreshToken(Long userId, String jti, String refreshToken, long ttlMillis) {
-        template.opsForValue().set(kRt(jti), refreshToken, Duration.ofMillis(ttlMillis));
-        template.opsForSet().add(kUserRt(userId), refreshToken);
+    public void saveToken(Long userId, String jti, long ttlMillis) {
+        template.opsForValue().set(kUserRt(userId), jti, Duration.ofMillis(ttlMillis));
     }
 
     @Override
-    public Optional<String> getRefreshToken(String jti) {
+    public Optional<String> getToken(String jti) {
         return Optional.ofNullable(template.opsForValue().get(kRt(jti)));
     }
 }
