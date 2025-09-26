@@ -96,19 +96,19 @@ public class JwtProvider {
         return getClaims(rt, refreshTokenKey);
     }
 
-    private Claims parseAtClaims(String rt) {
-        return getClaims(rt, accessTokenKey);
+    private Claims parseAtClaims(String at) {
+        return getClaims(at, accessTokenKey);
     }
 
-    private Claims getClaims(String rt, SecretKey accessTokenKey) {
-        String token = stripBearer(rt);
+    private Claims getClaims(String token, SecretKey key) {
+        String stripped = stripBearer(token);
 
         try {
             return Jwts.parser()
-                    .verifyWith(accessTokenKey)
+                    .verifyWith(key)
                     .clockSkewSeconds(DEFAULT_CLOCK_SKEW_SECONDS)
                     .build()
-                    .parseSignedClaims(token)
+                    .parseSignedClaims(stripped)
                     .getPayload();
 
         } catch (ExpiredJwtException e) {
@@ -125,7 +125,7 @@ public class JwtProvider {
                  IncorrectClaimException e) {
             throw new TokenException(JwtErrorCode.INVALID_CLAIMS);
         } catch (JwtException e) {
-            log.debug("JWT parse error (RT): {}", e.toString());
+            log.debug("JWT parse error: {}", e.toString());
             throw new TokenException(JwtErrorCode.INVALID_BEARER_TOKEN);
         }
     }
