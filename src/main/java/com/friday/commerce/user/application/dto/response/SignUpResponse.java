@@ -51,10 +51,10 @@ public record SignUpResponse(
 
         public static UserAgreement from(User user) {
             return UserAgreement.builder()
-                    .termsOfService(user.getUseragreement().isTermsOfService())
-                    .privacy(user.getUseragreement().isPrivacy())
-                    .marketing(user.getUseragreement().isMarketing())
-                    .agreedAt(user.getUseragreement().getAgreedAt())
+                    .termsOfService(user.getUserAgreement().isTermsOfService())
+                    .privacy(user.getUserAgreement().isPrivacy())
+                    .marketing(user.getUserAgreement().isMarketing())
+                    .agreedAt(user.getUserAgreement().getAgreedAt())
                     .build();
         }
     }
