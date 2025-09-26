@@ -7,15 +7,19 @@ import lombok.Builder;
 @Builder(access = AccessLevel.PRIVATE)
 public record SignInResponse(
         Long userId,
-        String accessToken,
-        String refreshToken
+        String at,
+        String rt,
+        long atTtlMs,
+        long rtTtlMs
 ) {
 
-    public static SignInResponse from(User user, String accessToken, String refreshToken) {
+    public static SignInResponse of(User user, String at, String rt, long atTtlMs, long rtTtlMs) {
         return SignInResponse.builder()
                 .userId(user.getUserId())
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .at(at)
+                .rt(rt)
+                .atTtlMs(atTtlMs)
+                .rtTtlMs(rtTtlMs)
                 .build();
     }
 }

@@ -13,6 +13,7 @@ import com.friday.commerce.user.domain.entity.UserAgreement;
 import com.friday.commerce.user.domain.exception.UserErrorCode;
 import com.friday.commerce.user.domain.exception.UserException;
 import com.friday.commerce.user.domain.port.TokenProvider;
+import com.friday.commerce.user.domain.port.UserCacheRepository;
 import com.friday.commerce.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ class UserService implements UserUseCase {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
+    private final UserCacheRepository userCacheRepository;
 
 
     private void verifyAgreement(Agreement agreement) {
@@ -109,14 +111,27 @@ class UserService implements UserUseCase {
     @Transactional
     @Override
     public SignInResponse signIn(SignInRequest request) {
+        // 1) ID, PW 확인
         User user = verifyUserByEmail(request.email());
-
         verifyUserPassword(request.password(), user.getPassword());
 
-        String accessToken = tokenProvider.issueAccessToken(user.getUserId(), user.getUserRole());
-        String refreshToken = tokenProvider.issueRefreshToken(user.getUserId());
+        // 2) 토큰 발급
+        String at = tokenProvider.issueAt(user.getUserId(), user.getUserRole());
+        String rt = tokenProvider.issueRt(user.getUserId());
 
-        return SignInResponse.from(user, accessToken, refreshToken);
+        // 3) jti/TTL 산출
+        String rtJtl = tokenProvider.getJti(rt);
+        long atTtlMs = tokenProvider.getTtlMs(at);
+        long rtTtlMs = tokenProvider.getTtlMs(rt);
+
+
+        // 4) RT를 Hash로 저장
+        userCacheRepository.saveRefreshToken(user.getUserId(), rtJtl, rt, rtTtlMs);
+
+        // 5) 응답
+        return SignInResponse.of(user, at, rt,  atTtlMs, rtTtlMs);
     }
+
+
 }
 
