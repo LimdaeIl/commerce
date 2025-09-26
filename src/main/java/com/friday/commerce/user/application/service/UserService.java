@@ -120,18 +120,16 @@ class UserService implements UserUseCase {
         String rt = tokenProvider.issueRt(user.getUserId());
 
         // 3) jti/TTL 산출
-        String rtJtl = tokenProvider.getJti(rt);
+        String rtJti = tokenProvider.getJti(rt);
         long atTtlMs = tokenProvider.getAtTtlMs(at);
         long rtTtlMs = tokenProvider.getRtTtlMs(rt);
 
         // 4) RT를 Hash로 저장
-        userCacheRepository.saveToken(user.getUserId(), rtJtl, rtTtlMs);
+        userCacheRepository.saveToken(user.getUserId(), rtJti, rtTtlMs);
 
         // 5) 응답
         return SignInResponse.of(user, at, rt, atTtlMs, rtTtlMs);
     }
-
-
 
 }
 
