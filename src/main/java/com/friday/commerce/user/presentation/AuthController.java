@@ -1,6 +1,8 @@
 package com.friday.commerce.user.presentation;
 
+import com.friday.commerce.user.application.dto.request.SignInRequest;
 import com.friday.commerce.user.application.dto.request.SignUpRequest;
+import com.friday.commerce.user.application.dto.response.SignInResponse;
 import com.friday.commerce.user.application.dto.response.SignUpResponse;
 import com.friday.commerce.user.application.usecase.UserUseCase;
 import jakarta.validation.Valid;
@@ -29,4 +31,17 @@ public class AuthController {
                 .status(HttpStatus.CREATED)
                 .body(response);
     }
+
+    @PostMapping("/sign-in")
+    public ResponseEntity<SignInResponse> signIn(
+            @RequestBody @Valid SignInRequest request
+    ) {
+        SignInResponse response = userUseCase.signIn(request);
+
+        return  ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+
+    }
+
 }

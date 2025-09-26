@@ -1,0 +1,38 @@
+@baseUrl = http://localhost:10000
+
+### @name SignUp_Success
+# 정상 회원가입 시나리오
+POST {{baseUrl}}/api/v1/auth/sign-up
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "Aa!23456",
+  "username": "앨리스123",
+  "agreement": {
+    "termsOfService": true,
+    "privacy": true,
+    "marketing": true
+  },
+  "address": {
+    "zipCode": "06236",
+    "addressLine1": "서울시 강남구 테헤란로 123",
+    "addressLine2": "OO빌딩 5층",
+    "city": "서울",
+    "state": "강남구"
+  }
+}
+
+
+### 로그인 성공 시나리오
+POST http://localhost:10000/api/v1/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "Aa!23456"
+}
+
+

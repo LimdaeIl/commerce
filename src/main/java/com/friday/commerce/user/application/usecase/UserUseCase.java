@@ -1,9 +1,13 @@
 package com.friday.commerce.user.application.usecase;
 
+import com.friday.commerce.user.application.dto.request.SignInRequest;
 import com.friday.commerce.user.application.dto.request.SignUpRequest;
+import com.friday.commerce.user.application.dto.response.SignInResponse;
 import com.friday.commerce.user.application.dto.response.SignUpResponse;
 
 public interface UserUseCase {
 
     SignUpResponse signUp(SignUpRequest request);
+
+    SignInResponse signIn(SignInRequest request);
 }
