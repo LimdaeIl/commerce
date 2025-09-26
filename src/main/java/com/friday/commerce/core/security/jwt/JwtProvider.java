@@ -82,18 +82,30 @@ public class JwtProvider {
         return claims.getId();
     }
 
-    public long getTtlMs(String token) {
-        Claims claims = parseRtClaims(token);
-        long ttlMs = claims.getExpiration().getTime() - System.currentTimeMillis();
-        return Math.max(ttlMs, 0);
+    public long getRtTtlMs(String rt) {
+        Claims c = parseRtClaims(rt);
+        return Math.max(c.getExpiration().getTime() - System.currentTimeMillis(), 0);
+    }
+
+    public long getAtTtlMs(String at) {
+        Claims c = parseAtClaims(at);
+        return Math.max(c.getExpiration().getTime() - System.currentTimeMillis(), 0);
     }
 
     private Claims parseRtClaims(String rt) {
+        return getClaims(rt, refreshTokenKey);
+    }
+
+    private Claims parseAtClaims(String rt) {
+        return getClaims(rt, accessTokenKey);
+    }
+
+    private Claims getClaims(String rt, SecretKey accessTokenKey) {
         String token = stripBearer(rt);
 
         try {
             return Jwts.parser()
-                    .verifyWith(refreshTokenKey)
+                    .verifyWith(accessTokenKey)
                     .clockSkewSeconds(DEFAULT_CLOCK_SKEW_SECONDS)
                     .build()
                     .parseSignedClaims(token)
