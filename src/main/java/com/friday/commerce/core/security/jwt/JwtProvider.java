@@ -1,9 +1,18 @@
 package com.friday.commerce.core.security.jwt;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.IncorrectClaimException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Jwts.SIG;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.MissingClaimException;
+import io.jsonwebtoken.PrematureJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import java.util.Date;
 import java.util.UUID;
 import javax.crypto.SecretKey;
@@ -66,5 +75,74 @@ public class JwtProvider {
                 .id(UUID.randomUUID().toString())
                 .signWith(refreshTokenKey, SIG.HS256)
                 .compact();
+    }
+
+    public String getJti(String token) {
+        Claims claims = parseRtClaims(token);
+        return claims.getId();
+    }
+
+    public long getRtTtlMs(String rt) {
+        Claims c = parseRtClaims(rt);
+        return Math.max(c.getExpiration().getTime() - System.currentTimeMillis(), 0);
+    }
+
+    public long getAtTtlMs(String at) {
+        Claims c = parseAtClaims(at);
+        return Math.max(c.getExpiration().getTime() - System.currentTimeMillis(), 0);
+    }
+
+    private Claims parseRtClaims(String rt) {
+        return getClaims(rt, refreshTokenKey);
+    }
+
+    private Claims parseAtClaims(String at) {
+        return getClaims(at, accessTokenKey);
+    }
+
+    private Claims getClaims(String token, SecretKey key) {
+        String stripped = stripBearer(token);
+
+        try {
+            return Jwts.parser()
+                    .verifyWith(key)
+                    .clockSkewSeconds(DEFAULT_CLOCK_SKEW_SECONDS)
+                    .build()
+                    .parseSignedClaims(stripped)
+                    .getPayload();
+
+        } catch (ExpiredJwtException e) {
+            throw new TokenException(JwtErrorCode.EXPIRED_TOKEN);
+        } catch (PrematureJwtException e) {
+            throw new TokenException(JwtErrorCode.PREMATURE_TOKEN);
+        } catch (UnsupportedJwtException e) {
+            throw new TokenException(JwtErrorCode.UNSUPPORTED_TOKEN);
+        } catch (MalformedJwtException e) {                 // 구조/인코딩 손상
+            throw new TokenException(JwtErrorCode.MALFORMED_TOKEN);
+        } catch (SecurityException | SignatureException e) {// 서명 위조/키 불일치
+            throw new TokenException(JwtErrorCode.TAMPERED_TOKEN);
+        } catch (MissingClaimException |    // 필수 클레임 누락
+                 IncorrectClaimException e) {
+            throw new TokenException(JwtErrorCode.INVALID_CLAIMS);
+        } catch (JwtException e) {
+            log.debug("JWT parse error: {}", e.toString());
+            throw new TokenException(JwtErrorCode.INVALID_BEARER_TOKEN);
+        }
+    }
+
+    private String stripBearer(String token) {
+        if (token == null || token.isBlank()) {
+            throw new TokenException(JwtErrorCode.NOT_FOUND_TOKEN); // null/blank는 '없음'으로 분류
+        }
+
+        String t = token.trim();
+        // "Bearer " 프리픽스가 있으면 제거(대소문자 무시)
+        if (t.regionMatches(true, 0, PREFIX_BEARER, 0, PREFIX_BEARER.length())) {
+            t = t.substring(PREFIX_BEARER.length()).trim();
+            if (t.isEmpty()) {
+                throw new TokenException(JwtErrorCode.NOT_FOUND_TOKEN);
+            }
+        }
+        return t;
     }
 }

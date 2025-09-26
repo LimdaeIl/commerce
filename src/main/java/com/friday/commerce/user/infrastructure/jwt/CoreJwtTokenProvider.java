@@ -13,12 +13,29 @@ public class CoreJwtTokenProvider implements TokenProvider {
     private final JwtProvider jwtProvider;
 
     @Override
-    public String issueAccessToken(Long userId, UserRole role) {
+    public String issueAt(Long userId, UserRole role) {
         return jwtProvider.generateAccessToken(userId, role.name());
     }
 
     @Override
-    public String issueRefreshToken(Long userId) {
+    public String issueRt(Long userId) {
         return jwtProvider.generateRefreshToken(userId);
     }
+
+    @Override
+    public String getJti(String token) {
+        return jwtProvider.getJti(token);
+    }
+
+    @Override
+    public long getRtTtlMs(String rt) {
+        return jwtProvider.getRtTtlMs(rt);
+    }
+
+    @Override
+    public long getAtTtlMs(String at) {
+        return jwtProvider.getAtTtlMs(at);
+    }
+
+
 }
