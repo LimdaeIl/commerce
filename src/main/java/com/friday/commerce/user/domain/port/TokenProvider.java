@@ -10,6 +10,8 @@ public interface TokenProvider {
 
     String getRtJti(String token);
 
+    String getAtJti(String token);
+
     long getRtTtlMs(String rt);
 
     long getAtTtlMs(String at);
