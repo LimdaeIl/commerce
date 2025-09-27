@@ -1,5 +1,6 @@
 package com.friday.commerce.user.presentation;
 
+import com.friday.commerce.user.application.dto.request.LogoutRequest;
 import com.friday.commerce.user.application.dto.request.SignInRequest;
 import com.friday.commerce.user.application.dto.request.SignUpRequest;
 import com.friday.commerce.user.application.dto.response.SignInResponse;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,7 +43,18 @@ public class AuthController {
         return  ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);
+    }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @RequestHeader(name = "Authorization") String authHeader,
+            @RequestBody @Valid LogoutRequest request
+    ) {
+        userUseCase.logout(authHeader, request);
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
 }

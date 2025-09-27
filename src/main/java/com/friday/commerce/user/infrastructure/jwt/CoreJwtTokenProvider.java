@@ -37,5 +37,15 @@ public class CoreJwtTokenProvider implements TokenProvider {
         return jwtProvider.getAtTtlMs(at);
     }
 
+    @Override
+    public Long getRtUserId(String rt) {
+        return jwtProvider.getRtUserId(rt);
+    }
+
+    @Override
+    public Long getAtUserId(String at) {
+        return jwtProvider.getAtUserId(at);
+    }
+
 
 }

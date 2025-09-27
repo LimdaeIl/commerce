@@ -2,6 +2,7 @@ package com.friday.commerce.user.infrastructure.redis;
 
 import com.friday.commerce.user.domain.port.UserCacheRepository;
 import java.time.Duration;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -33,5 +34,27 @@ public class RedisUserCacheRepository implements UserCacheRepository {
     @Override
     public void saveToken(Long userId, String jti, long ttlMillis) {
         template.opsForValue().set(kUserRt(userId), jti, Duration.ofMillis(ttlMillis));
+    }
+
+    @Override
+    public void atBlackList(String atJti, long atTtlMs) {
+        if (atTtlMs <= 0) return ;
+        template.opsForValue().set(kBlAt(atJti), "1", Duration.ofMillis(atTtlMs));
+    }
+
+    @Override
+    public void rtBlackList(String rtJti, long rtTtlMs) {
+        if (rtTtlMs <= 0) return ;
+        template.opsForValue().set(kBlRt(rtJti), "1", Duration.ofMillis(rtTtlMs));
+    }
+
+    @Override
+    public Optional<String> getRtJti(Long rtJti) {
+        return Optional.ofNullable(template.opsForValue().get(kUserRt(rtJti)));
+    }
+
+    @Override
+    public void deleteRt(Long rtUserId) {
+        template.delete(kUserRt(rtUserId));
     }
 }

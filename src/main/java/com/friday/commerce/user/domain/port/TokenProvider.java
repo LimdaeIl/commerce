@@ -13,4 +13,8 @@ public interface TokenProvider {
     long getRtTtlMs(String rt);
 
     long getAtTtlMs(String at);
+
+    Long getRtUserId(String rt);
+
+    Long getAtUserId(String at);
 }

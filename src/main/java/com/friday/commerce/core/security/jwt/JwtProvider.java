@@ -92,6 +92,21 @@ public class JwtProvider {
         return Math.max(c.getExpiration().getTime() - System.currentTimeMillis(), 0);
     }
 
+    public Long getRtUserId(String rt) {
+        Claims c = parseRtClaims(rt);
+        return Long.parseLong(c.getSubject());
+    }
+
+    public Long getAtUserId(String at) {
+        Claims c = parseAtClaims(at);
+        return Long.parseLong(c.getSubject());
+    }
+
+
+
+
+
+
     private Claims parseRtClaims(String rt) {
         return getClaims(rt, refreshTokenKey);
     }
