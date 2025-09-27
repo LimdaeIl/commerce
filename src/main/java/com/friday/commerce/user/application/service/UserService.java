@@ -139,7 +139,7 @@ class UserService implements UserUseCase {
         Long rtUserId = tokenProvider.getRtUserId(request.rt());
 
         // 토큰(at, rt)에서 jti 추출 -> JwtProvider
-        String atJti = tokenProvider.getRtJti(authHeader);
+        String atJti = tokenProvider.getAtJti(authHeader);
         String rtJti = tokenProvider.getRtJti(request.rt());
 
         // 레디스 안에 RT 토큰과 요청 토큰의 jti 일치하는 지 확인 및 조회

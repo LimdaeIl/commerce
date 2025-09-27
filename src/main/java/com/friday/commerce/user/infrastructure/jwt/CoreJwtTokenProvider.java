@@ -28,6 +28,11 @@ public class CoreJwtTokenProvider implements TokenProvider {
     }
 
     @Override
+    public String getAtJti(String token) {
+        return jwtProvider.getAtJti(token);
+    }
+
+    @Override
     public long getRtTtlMs(String rt) {
         return jwtProvider.getRtTtlMs(rt);
     }

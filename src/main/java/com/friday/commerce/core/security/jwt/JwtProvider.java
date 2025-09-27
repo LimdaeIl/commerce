@@ -82,6 +82,11 @@ public class JwtProvider {
         return claims.getId();
     }
 
+    public String getAtJti(String token) {
+        Claims claims = parseRtClaims(token);
+        return claims.getId();
+    }
+    
     public long getRtTtlMs(String rt) {
         Claims c = parseRtClaims(rt);
         return Math.max(c.getExpiration().getTime() - System.currentTimeMillis(), 0);
@@ -160,4 +165,5 @@ public class JwtProvider {
         }
         return t;
     }
+
 }
