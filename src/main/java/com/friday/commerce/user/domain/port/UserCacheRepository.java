@@ -6,13 +6,17 @@ public interface UserCacheRepository {
 
     void saveToken(Long userId, String jti, long ttlMillis);
 
-    void atBlackList(String atJti, long atTtlMs);
+    void atSetBl(String atJti, long atTtlMs);
 
-    void rtBlackList(String rtJti, long rtTtlMs);
+    void rtSetBl(String rtJti, long rtTtlMs);
 
     Optional<String> getRtJti(Long rtJti);
 
     void deleteRt(Long rtUserId);
+
+    boolean isAtBl(String atJti);
+
+    boolean isRtBl(String rtJti);
 }
 
 

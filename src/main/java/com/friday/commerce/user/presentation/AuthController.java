@@ -1,8 +1,10 @@
 package com.friday.commerce.user.presentation;
 
 import com.friday.commerce.user.application.dto.request.LogoutRequest;
+import com.friday.commerce.user.application.dto.request.ReIssueRequest;
 import com.friday.commerce.user.application.dto.request.SignInRequest;
 import com.friday.commerce.user.application.dto.request.SignUpRequest;
+import com.friday.commerce.user.application.dto.response.ReIssueResponse;
 import com.friday.commerce.user.application.dto.response.SignInResponse;
 import com.friday.commerce.user.application.dto.response.SignUpResponse;
 import com.friday.commerce.user.application.usecase.UserUseCase;
@@ -25,7 +27,7 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<SignUpResponse> signUp(
-        @RequestBody @Valid SignUpRequest request
+            @RequestBody @Valid SignUpRequest request
     ) {
         SignUpResponse response = userUseCase.signUp(request);
 
@@ -40,7 +42,7 @@ public class AuthController {
     ) {
         SignInResponse response = userUseCase.signIn(request);
 
-        return  ResponseEntity
+        return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);
     }
@@ -56,5 +58,18 @@ public class AuthController {
                 .noContent()
                 .build();
     }
+
+    @PostMapping("/token-reissue")
+    public ResponseEntity<ReIssueResponse> reissue(
+            @RequestHeader(name = "Authorization", required = false, defaultValue = "") String authHeader,
+            @RequestBody @Valid ReIssueRequest request
+    ) {
+        ReIssueResponse response = userUseCase.reIssue(authHeader, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
 
 }
