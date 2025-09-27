@@ -2,11 +2,15 @@ package com.friday.commerce.user.presentation;
 
 import com.friday.commerce.user.application.dto.request.LogoutRequest;
 import com.friday.commerce.user.application.dto.request.ReIssueRequest;
+import com.friday.commerce.user.application.dto.request.SendCodeEmailRequest;
 import com.friday.commerce.user.application.dto.request.SignInRequest;
 import com.friday.commerce.user.application.dto.request.SignUpRequest;
+import com.friday.commerce.user.application.dto.request.VerifyCodeEmailRequest;
 import com.friday.commerce.user.application.dto.response.ReIssueResponse;
+import com.friday.commerce.user.application.dto.response.SendCodeEmailResponse;
 import com.friday.commerce.user.application.dto.response.SignInResponse;
 import com.friday.commerce.user.application.dto.response.SignUpResponse;
+import com.friday.commerce.user.application.dto.response.VerifyCodeEmailResponse;
 import com.friday.commerce.user.application.usecase.UserUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -65,6 +69,29 @@ public class AuthController {
             @RequestBody @Valid ReIssueRequest request
     ) {
         ReIssueResponse response = userUseCase.reIssue(authHeader, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+
+    @PostMapping("/email/send-code")
+    public ResponseEntity<SendCodeEmailResponse> SendCodeEmail(
+            @Valid @RequestBody SendCodeEmailRequest request
+    ) {
+        SendCodeEmailResponse response = userUseCase.sendCodeEmail(request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @PostMapping("/email/verify")
+    public ResponseEntity<VerifyCodeEmailResponse> verifyCodeEmail(
+            @Valid @RequestBody VerifyCodeEmailRequest request
+    ) {
+        VerifyCodeEmailResponse response = userUseCase.verifyCodeEmail(request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

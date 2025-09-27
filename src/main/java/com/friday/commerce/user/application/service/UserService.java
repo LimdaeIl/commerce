@@ -1,23 +1,35 @@
 package com.friday.commerce.user.application.service;
 
+import com.friday.commerce.core.mail.application.port.EmailTemplateRendererPort;
+import com.friday.commerce.core.mail.application.port.MailSenderPort;
+import com.friday.commerce.core.mail.domain.EmailMessage;
 import com.friday.commerce.core.utils.snowflake.Snowflake;
 import com.friday.commerce.user.application.dto.request.LogoutRequest;
 import com.friday.commerce.user.application.dto.request.ReIssueRequest;
+import com.friday.commerce.user.application.dto.request.SendCodeEmailRequest;
 import com.friday.commerce.user.application.dto.request.SignInRequest;
 import com.friday.commerce.user.application.dto.request.SignUpRequest;
 import com.friday.commerce.user.application.dto.request.SignUpRequest.Agreement;
+import com.friday.commerce.user.application.dto.request.VerifyCodeEmailRequest;
 import com.friday.commerce.user.application.dto.response.ReIssueResponse;
+import com.friday.commerce.user.application.dto.response.SendCodeEmailResponse;
 import com.friday.commerce.user.application.dto.response.SignInResponse;
 import com.friday.commerce.user.application.dto.response.SignUpResponse;
+import com.friday.commerce.user.application.dto.response.VerifyCodeEmailResponse;
 import com.friday.commerce.user.application.usecase.UserUseCase;
 import com.friday.commerce.user.domain.entity.User;
 import com.friday.commerce.user.domain.entity.UserAddress;
 import com.friday.commerce.user.domain.entity.UserAgreement;
 import com.friday.commerce.user.domain.exception.UserErrorCode;
 import com.friday.commerce.user.domain.exception.UserException;
+import com.friday.commerce.user.domain.policy.EmailVerificationPolicy;
+import com.friday.commerce.user.domain.port.EmailVerificationRepositoryPort;
 import com.friday.commerce.user.domain.port.TokenProvider;
 import com.friday.commerce.user.domain.port.UserCacheRepository;
 import com.friday.commerce.user.domain.repository.UserRepository;
+import java.security.SecureRandom;
+import java.util.Locale;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +47,10 @@ class UserService implements UserUseCase {
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final UserCacheRepository userCacheRepository;
+    private final EmailVerificationRepositoryPort emailVerificationRepositoryPort;
+    private final EmailVerificationPolicy emailVerificationPolicy;
+    private final MailSenderPort mailSender;
+    private final EmailTemplateRendererPort templateRenderer;
 
 
     private void verifyAgreement(Agreement agreement) {
@@ -229,6 +245,117 @@ class UserService implements UserUseCase {
         userCacheRepository.saveToken(rtUserId, newRtJti, newRtTtlMs);
 
         return ReIssueResponse.of(userById, newAt, newRt, newAtTtlMs, newRtTtlMs);
+    }
+
+    @Transactional
+    @Override
+    public SendCodeEmailResponse sendCodeEmail(SendCodeEmailRequest request) {
+        final String email = request.email().trim().toLowerCase(Locale.ROOT);
+
+        // 이미 등록된 이메일이면 예외 발생
+        existsUserByEmail(email);
+
+        // 차단 상태 확인
+        if (emailVerificationRepositoryPort.isBlocked(email)) {
+            throw new UserException(UserErrorCode.EMAIL_VERIFICATION_BLOCKED);
+        }
+
+        // 쿨타임 체크
+        if (emailVerificationRepositoryPort.inCooltime(email)) {
+            throw new UserException(UserErrorCode.EMAIL_VERIFICATION_COOLTIME);
+        }
+
+        // 코드 6자리 생성
+        String code = generate6DigitCode();
+
+        // 코드 저장(코드 암호화)
+        emailVerificationRepositoryPort.saveCode(
+                email,
+                passwordEncoder.encode(code),
+                emailVerificationPolicy.codeValidityDuration()
+        );
+
+        // 쿨타임 세팅
+        emailVerificationRepositoryPort.setCooltime(
+                email,
+                emailVerificationPolicy.resendCooldownDuration()
+        );
+
+        // 렌더링
+        long minutes = Math.max(emailVerificationPolicy.codeValidityDuration().toMinutes(), 1);
+        String html = templateRenderer.render(
+                "verification-code",
+                Map.of("brand", "commerce", "code", code, "minutes", minutes)
+        );
+
+        // 메일 발송
+        mailSender.send(
+                new EmailMessage(
+                        null,  // from이 null이면 spring.mail.username 사용
+                        email,
+                        "[ commerce ] 이메일 인증코드",
+                        html
+                ));
+
+        // 응답
+        return SendCodeEmailResponse.of(email, minutes);
+    }
+
+    @Transactional
+    @Override
+    public VerifyCodeEmailResponse verifyCodeEmail(VerifyCodeEmailRequest request) {
+        final String email = request.email().trim().toLowerCase(Locale.ROOT);
+
+        // 차단 상태 확인
+        if (emailVerificationRepositoryPort.isBlocked(email)) {
+            throw new UserException(UserErrorCode.EMAIL_VERIFICATION_BLOCKED);
+        }
+
+        // 코드 조회
+        String storedCode = emailVerificationRepositoryPort.getCode(email)
+                .orElseThrow(
+                        () -> new UserException(UserErrorCode.EMAIL_VERIFICATION_NOT_REQUESTED));
+
+        // 코드 검증
+        String input = String.valueOf(request.code());
+        boolean ok = passwordEncoder.matches(input, storedCode);
+
+        // 코드가 틀린 경우
+        if (!ok) {
+            long attempts = emailVerificationRepositoryPort.incrementAttempts(
+                    email, emailVerificationPolicy.codeValidityDuration()
+            );
+
+            // 최대 코드 검증 횟수 초과하면 일정 시간만큼 Lock
+            if (attempts >= emailVerificationPolicy.maxAttemptCount()) {
+                emailVerificationRepositoryPort.block(email,
+                        emailVerificationPolicy.lockoutDuration());
+
+                emailVerificationRepositoryPort.deleteCode(email);
+                emailVerificationRepositoryPort.resetAttempts(email);
+            }
+            throw new UserException(UserErrorCode.EMAIL_VERIFY_CODE_MISMATCH);
+        }
+
+        // 코드 검증 성공 후 처리
+        emailVerificationRepositoryPort.deleteCode(email);
+        emailVerificationRepositoryPort.resetAttempts(email);
+        emailVerificationRepositoryPort.clearVerified(email);
+        emailVerificationRepositoryPort.markVerified(email,
+                emailVerificationPolicy.successValidityDuration());
+
+        // 인증 성공 유지 시간
+        long verifiedUntil =
+                System.currentTimeMillis() + emailVerificationPolicy.successValidityDuration()
+                        .toMillis();
+
+        return VerifyCodeEmailResponse.of(email, verifiedUntil);
+    }
+
+    private String generate6DigitCode() {
+        SecureRandom r = new SecureRandom();
+        int n = 100000 + r.nextInt(900000);
+        return String.valueOf(n);
     }
 }
 
