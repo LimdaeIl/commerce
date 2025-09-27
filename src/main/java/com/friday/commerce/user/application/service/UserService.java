@@ -2,9 +2,11 @@ package com.friday.commerce.user.application.service;
 
 import com.friday.commerce.core.utils.snowflake.Snowflake;
 import com.friday.commerce.user.application.dto.request.LogoutRequest;
+import com.friday.commerce.user.application.dto.request.ReIssueRequest;
 import com.friday.commerce.user.application.dto.request.SignInRequest;
 import com.friday.commerce.user.application.dto.request.SignUpRequest;
 import com.friday.commerce.user.application.dto.request.SignUpRequest.Agreement;
+import com.friday.commerce.user.application.dto.response.ReIssueResponse;
 import com.friday.commerce.user.application.dto.response.SignInResponse;
 import com.friday.commerce.user.application.dto.response.SignUpResponse;
 import com.friday.commerce.user.application.usecase.UserUseCase;
@@ -21,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Slf4j(topic = "UserService")
 @RequiredArgsConstructor
@@ -73,6 +76,11 @@ class UserService implements UserUseCase {
         if (userRepository.existsByEmail(email)) {
             throw new UserException(UserErrorCode.EMAIL_DUPLICATED);
         }
+    }
+
+    private User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
     }
 
     @Transactional
@@ -155,13 +163,72 @@ class UserService implements UserUseCase {
         long rtTtlMs = tokenProvider.getRtTtlMs(request.rt());
 
         // 토큰(at, rt)을 블랙리스트로 등록 -> JwtProvider
-        userCacheRepository.atBlackList(atJti, atTtlMs);
-        userCacheRepository.rtBlackList(rtJti, rtTtlMs);
+        userCacheRepository.atSetBl(atJti, atTtlMs);
+        userCacheRepository.rtSetBl(rtJti, rtTtlMs);
 
         // 토큰 삭제(rt) -> JwtProvider
         userCacheRepository.deleteRt(rtUserId);
     }
 
+    @Transactional
+    @Override
+    public ReIssueResponse reIssue(String authHeader, ReIssueRequest request) {
+        // 토큰으로부터 회원 ID 추출
+        Long rtUserId = tokenProvider.getRtUserId(request.rt());
 
+        // 토큰(rt)에서 jti 추출 -> JwtProvider
+        String rtJti = tokenProvider.getRtJti(request.rt());
+
+        // 블랙리스트 등록된 RT 인지 확인
+        if (userCacheRepository.isRtBl(rtJti)) {
+            throw new UserException(UserErrorCode.RT_BLACKLIST);
+        }
+
+        // 레디스 안에 RT 토큰과 요청 토큰의 jti 일치하는 지 확인 및 조회
+        String getRtJti = userCacheRepository.getRtJti(rtUserId)
+                .orElseThrow(() -> new UserException(UserErrorCode.RT_NOT_FOUND));
+
+        if (!getRtJti.equals(rtJti)) {
+            throw new UserException(UserErrorCode.RT_JTI_INCORRECT);
+        }
+
+        // 토큰(rt)에서 남은 시간 추출 -> JwtProvider
+        long rtTtlMs = tokenProvider.getRtTtlMs(request.rt());
+
+        // 선택: 토큰(at) 블랙리스트 등록 -> userCacheRepository
+        if (StringUtils.hasText(authHeader)) {
+            long atTtlMs = tokenProvider.getAtTtlMs(authHeader);
+            String atJti = tokenProvider.getAtJti(authHeader);
+
+            if (userCacheRepository.isAtBl(atJti)) {
+                throw new UserException(UserErrorCode.AT_BLACKLIST);
+            }
+
+            userCacheRepository.atSetBl(atJti, atTtlMs);
+        }
+
+        // rt 블랙리스트 등록
+        userCacheRepository.rtSetBl(rtJti, rtTtlMs);
+
+        // 토큰 삭제(rt) -> JwtProvider
+        userCacheRepository.deleteRt(rtUserId);
+
+        // 실제 유저 존재하는지 확인 + 권한 확인
+        User userById = findUserById(rtUserId);
+
+        // 토큰 발급
+        String newAt = tokenProvider.issueAt(rtUserId, userById.getUserRole());
+        String newRt = tokenProvider.issueRt(rtUserId);
+
+        // jti/TTL 산출
+        String newRtJti = tokenProvider.getRtJti(newRt);
+        long newAtTtlMs = tokenProvider.getAtTtlMs(newAt);
+        long newRtTtlMs = tokenProvider.getRtTtlMs(newRt);
+
+        // 4) jti(RT) 저장
+        userCacheRepository.saveToken(rtUserId, newRtJti, newRtTtlMs);
+
+        return ReIssueResponse.of(userById, newAt, newRt, newAtTtlMs, newRtTtlMs);
+    }
 }
 
