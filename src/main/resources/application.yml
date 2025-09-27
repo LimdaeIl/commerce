@@ -73,6 +73,25 @@ spring:
     access-token-expiration: ${ACCESS_TOKEN_EXPIRATION:36000000}
     refresh-token-expiration: ${REFRESH_TOKEN_EXPIRATION:86400000}
 
+  mail:
+    host: smtp.naver.com
+    port: ${NAVER_MAIL_PORT}
+    username: ${NAVER_ID}
+    password: ${NAVER_PW}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+          starttls:
+            enable: true
+            required: true
+          connectionTimeout: ${TIMEOUT}
+          timeout: ${TIMEOUT}
+          writeTimeout: ${TIMEOUT}
+        debug: true
+
 management:
   health:
     redis:
@@ -109,3 +128,12 @@ snowflake:
   node-id: ${SNOWFLAKE_NODE_ID}                       # 각 인스턴스/노드별 고유 값 할당
   clock-skew-tolerance-millis: ${SNOWFLAKE_CLOCK_SKEW_TOLERANCE_MILLIS}  # 5~20 권장
   auto-detect-node-id: ${SNOWFLAKE_AUTO_DETECT_NODE_ID}       # 운영에선 명시 지정 권장
+
+
+auth:
+  email: # ← EmailVerificationProperties(@ConfigurationProperties) 바인딩
+    code-validity-duration: 5m          # Duration 타입: 5분
+    resend-cooldown-duration: 60s       # 재요청 쿨타임
+    max-attempts: 5                     # 최대 인증 시도
+    lockout-duration: 10m               # 시도 초과 차단 시간
+    success-validity-duration: 10m      # 검증 성공 플래그 TTL
