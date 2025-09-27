@@ -1,6 +1,7 @@
 package com.friday.commerce.user.application.service;
 
 import com.friday.commerce.core.utils.snowflake.Snowflake;
+import com.friday.commerce.user.application.dto.request.LogoutRequest;
 import com.friday.commerce.user.application.dto.request.SignInRequest;
 import com.friday.commerce.user.application.dto.request.SignUpRequest;
 import com.friday.commerce.user.application.dto.request.SignUpRequest.Agreement;
@@ -124,12 +125,43 @@ class UserService implements UserUseCase {
         long atTtlMs = tokenProvider.getAtTtlMs(at);
         long rtTtlMs = tokenProvider.getRtTtlMs(rt);
 
-        // 4) RT를 Hash로 저장
+        // 4) jti(RT) 저장
         userCacheRepository.saveToken(user.getUserId(), rtJti, rtTtlMs);
 
         // 5) 응답
         return SignInResponse.of(user, at, rt, atTtlMs, rtTtlMs);
     }
+
+    @Transactional
+    @Override
+    public void logout(String authHeader, LogoutRequest request) {
+        // 토큰으로부터 회원 ID 추출
+        Long rtUserId = tokenProvider.getRtUserId(request.rt());
+
+        // 토큰(at, rt)에서 jti 추출 -> JwtProvider
+        String atJti = tokenProvider.getJti(authHeader);
+        String rtJti = tokenProvider.getJti(request.rt());
+
+        // 레디스 안에 RT 토큰과 요청 토큰의 jti 일치하는 지 확인 및 조회
+        String getRtJti = userCacheRepository.getRtJti(rtUserId)
+                .orElseThrow(() -> new UserException(UserErrorCode.RT_NOT_FOUND));
+
+        if (!getRtJti.equals(rtJti)) {
+            throw new UserException(UserErrorCode.RT_JTI_INCORRECT);
+        }
+
+        // 토큰(at, rt)에서 남은 시간 추출 -> JwtProvider
+        long atTtlMs = tokenProvider.getAtTtlMs(authHeader);
+        long rtTtlMs = tokenProvider.getRtTtlMs(request.rt());
+
+        // 토큰(at, rt)을 블랙리스트로 등록 -> JwtProvider
+        userCacheRepository.atBlackList(atJti, atTtlMs);
+        userCacheRepository.rtBlackList(rtJti, rtTtlMs);
+
+        // 토큰 삭제(rt) -> JwtProvider
+        userCacheRepository.deleteRt(rtUserId);
+    }
+
 
 }
 
