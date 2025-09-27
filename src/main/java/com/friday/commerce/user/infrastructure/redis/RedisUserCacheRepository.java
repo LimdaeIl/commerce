@@ -48,10 +48,12 @@ public class RedisUserCacheRepository implements UserCacheRepository {
         template.opsForValue().set(kBlRt(rtJti), "1", Duration.ofMillis(rtTtlMs));
     }
 
+    @Override
     public boolean isAtBl(String atJti) {
         return template.hasKey(kBlAt(atJti));
     }
 
+    @Override
     public boolean isRtBl(String rtJti) {
         return template.hasKey(kBlRt(rtJti));
     }

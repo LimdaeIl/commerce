@@ -195,7 +195,7 @@ class UserService implements UserUseCase {
         // 토큰(rt)에서 남은 시간 추출 -> JwtProvider
         long rtTtlMs = tokenProvider.getRtTtlMs(request.rt());
 
-        // 선택: 토큰(at) 블랙리스트 등록 -> JwtProvider
+        // 선택: 토큰(at) 블랙리스트 등록 -> userCacheRepository
         if (StringUtils.hasText(authHeader)) {
             long atTtlMs = tokenProvider.getAtTtlMs(authHeader);
             String atJti = tokenProvider.getAtJti(authHeader);
@@ -207,7 +207,7 @@ class UserService implements UserUseCase {
             userCacheRepository.atSetBl(atJti, atTtlMs);
         }
 
-        // at 블랙리스트 등록
+        // rt 블랙리스트 등록
         userCacheRepository.rtSetBl(rtJti, rtTtlMs);
 
         // 토큰 삭제(rt) -> JwtProvider
