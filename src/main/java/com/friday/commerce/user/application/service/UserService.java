@@ -121,7 +121,7 @@ class UserService implements UserUseCase {
         String rt = tokenProvider.issueRt(user.getUserId());
 
         // 3) jti/TTL 산출
-        String rtJti = tokenProvider.getJti(rt);
+        String rtJti = tokenProvider.getRtJti(rt);
         long atTtlMs = tokenProvider.getAtTtlMs(at);
         long rtTtlMs = tokenProvider.getRtTtlMs(rt);
 
@@ -139,8 +139,8 @@ class UserService implements UserUseCase {
         Long rtUserId = tokenProvider.getRtUserId(request.rt());
 
         // 토큰(at, rt)에서 jti 추출 -> JwtProvider
-        String atJti = tokenProvider.getJti(authHeader);
-        String rtJti = tokenProvider.getJti(request.rt());
+        String atJti = tokenProvider.getRtJti(authHeader);
+        String rtJti = tokenProvider.getRtJti(request.rt());
 
         // 레디스 안에 RT 토큰과 요청 토큰의 jti 일치하는 지 확인 및 조회
         String getRtJti = userCacheRepository.getRtJti(rtUserId)

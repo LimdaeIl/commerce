@@ -8,7 +8,7 @@ public interface TokenProvider {
 
     String issueRt(Long userId);
 
-    String getJti(String token);
+    String getRtJti(String token);
 
     long getRtTtlMs(String rt);
 

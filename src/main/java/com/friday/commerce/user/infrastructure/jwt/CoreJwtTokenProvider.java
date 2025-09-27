@@ -23,8 +23,8 @@ public class CoreJwtTokenProvider implements TokenProvider {
     }
 
     @Override
-    public String getJti(String token) {
-        return jwtProvider.getJti(token);
+    public String getRtJti(String token) {
+        return jwtProvider.getRtJti(token);
     }
 
     @Override
