@@ -346,7 +346,7 @@ class UserService implements UserUseCase {
 
         // 인증 성공 유지 시간
         long verifiedUntil =
-                System.currentTimeMillis() + emailVerificationPolicy.codeValidityDuration()
+                System.currentTimeMillis() + emailVerificationPolicy.successValidityDuration()
                         .toMillis();
 
         return VerifyCodeEmailResponse.of(email, verifiedUntil);
