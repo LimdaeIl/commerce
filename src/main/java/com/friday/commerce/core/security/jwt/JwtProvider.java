@@ -77,7 +77,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String getJti(String token) {
+    public String getRtJti(String token) {
         Claims claims = parseRtClaims(token);
         return claims.getId();
     }
