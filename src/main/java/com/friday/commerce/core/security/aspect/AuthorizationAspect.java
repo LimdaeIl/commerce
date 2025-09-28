@@ -1,5 +1,7 @@
 package com.friday.commerce.core.security.aspect;
 
+import static com.friday.commerce.core.utils.AuthKeys.Attr.USER_ROLE;
+
 import com.friday.commerce.core.security.annotation.RequireRole;
 import com.friday.commerce.core.security.model.UserRole;
 import com.friday.commerce.core.web.exception.AppErrorCode;
@@ -22,7 +24,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Component
 public class AuthorizationAspect {
 
-    private final static String ATTR_USER_ROLE = "X-User-Role";
 
     @Before("@within(com.friday.commerce.core.security.annotation.RequireRole) || @annotation(com.friday.commerce.core.security.annotation.RequireRole)")
     public void requireRole(JoinPoint jp) {
@@ -72,7 +73,7 @@ public class AuthorizationAspect {
         }
 
         HttpServletRequest request = attrs.getRequest();
-        Object roleAttr = request.getAttribute(ATTR_USER_ROLE);
+        Object roleAttr = request.getAttribute(USER_ROLE);
 
         if (roleAttr == null) {
             throw new AppException(AppErrorCode.MISSING_HEADER_USER_ROLE);
