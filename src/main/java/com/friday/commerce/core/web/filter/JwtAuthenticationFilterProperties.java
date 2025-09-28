@@ -17,7 +17,7 @@ public class JwtAuthenticationFilterProperties {
     private List<String> includePathPatterns = new ArrayList<>();
     private PathClass defaultPathPattern = PathClass.REQUIRED;
 
-    private List<String> excludeMethods = List.of();
+    private List<String> excludeMethods = new ArrayList<>();
     private boolean cookieFallback = false;
     private String atCookie = "Access-Token";
 }
