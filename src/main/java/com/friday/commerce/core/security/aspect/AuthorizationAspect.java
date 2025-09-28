@@ -22,7 +22,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Component
 public class AuthorizationAspect {
 
-    private final String ATTR_USER_ROLE = "X-User-Role";
+    private final static String ATTR_USER_ROLE = "X-User-Role";
 
     @Before("@within(com.friday.commerce.core.security.annotation.RequireRole) || @annotation(com.friday.commerce.core.security.annotation.RequireRole)")
     public void requireRole(JoinPoint jp) {
