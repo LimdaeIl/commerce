@@ -83,10 +83,10 @@ public class JwtProvider {
     }
 
     public String getAtJti(String token) {
-        Claims claims = parseRtClaims(token);
+        Claims claims = parseAtClaims(token);
         return claims.getId();
     }
-    
+
     public long getRtTtlMs(String rt) {
         Claims c = parseRtClaims(rt);
         return Math.max(c.getExpiration().getTime() - System.currentTimeMillis(), 0);
@@ -107,9 +107,14 @@ public class JwtProvider {
         return Long.parseLong(c.getSubject());
     }
 
-
-
-
+    public String getAtUserRole(String at) {
+        Claims c = parseAtClaims(at);
+        String role = c.get(CLAIM_USER_ROLE, String.class);
+        if (role == null || role.isBlank()) {
+            throw new TokenException(JwtErrorCode.INVALID_CLAIMS);
+        }
+        return role;
+    }
 
 
     private Claims parseRtClaims(String rt) {

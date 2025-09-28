@@ -20,6 +20,7 @@ public enum AppErrorCode implements ErrorCode {
 
     // 요청/형식/프로토콜
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "공통: 잘못된 입력입니다."),
+    INVALID_USER_INFO(HttpStatus.BAD_REQUEST, "공통: 현재 사용자 정보가 올바르지 않습니다."),
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "공통: 입력값 검증에 실패했습니다."),
     BINDING_ERROR(HttpStatus.BAD_REQUEST, "공통: 요청 데이터 바인딩에 실패했습니다."),
     TYPE_MISMATCH(HttpStatus.BAD_REQUEST, "공통: 파라미터 타입이 일치하지 않습니다."),
@@ -37,7 +38,10 @@ public enum AppErrorCode implements ErrorCode {
     // [헤더/메타데이터]
     INVALID_HEADER(HttpStatus.BAD_REQUEST, "공통: 잘못된 헤더 정보입니다."),
     MISSING_HEADER(HttpStatus.BAD_REQUEST, "공통: 필수 헤더가 누락되었습니다."),
+    MISSING_HEADER_USER_ID(HttpStatus.BAD_REQUEST, "공통: 회원 ID 헤더가 누락되었습니다."),
     MISSING_HEADER_USER_ROLE(HttpStatus.BAD_REQUEST, "공통: 회원 권한 헤더가 누락되었습니다."),
+    INVALID_HEADER_USER_ID(HttpStatus.BAD_REQUEST, "공통: 회원 ID 헤더가 잘못된 값 입니다."),
+    INVALID_HEADER_USER_ID_NOT_INTEGER(HttpStatus.BAD_REQUEST, "공통: 회원 ID 헤더 값이 숫자가 아닙니다."),
     INVALID_HEADER_USER_ROLE(HttpStatus.BAD_REQUEST, "공통: 값이 올바른 회원 권한 형식이 아닙니다."),
     INVALID_QUERY_PARAMETER(HttpStatus.BAD_REQUEST, "공통: 잘못된 쿼리 파라미터입니다."),
 

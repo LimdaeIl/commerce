@@ -137,3 +137,19 @@ auth:
     max-attempts: 5                     # 최대 인증 시도
     lockout-duration: 10m               # 시도 초과 차단 시간
     success-validity-duration: 10m      # 검증 성공 플래그 TTL
+
+
+security:
+  current-user:
+    allow-header-fallback: false
+
+  jwt:
+    filter:
+      default-path-pattern: REQUIRED
+      exclude-path-patterns:
+        - /actuator/**
+        - /docs/**
+      optional-path-patterns:
+        - /users/**
+      include-path-patterns:
+        /api/**
