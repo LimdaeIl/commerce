@@ -1,7 +1,7 @@
 package com.friday.commerce.user.infrastructure.jwt;
 
 import com.friday.commerce.core.security.jwt.JwtProvider;
-import com.friday.commerce.user.domain.entity.UserRole;
+import com.friday.commerce.core.security.model.UserRole;
 import com.friday.commerce.user.domain.port.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

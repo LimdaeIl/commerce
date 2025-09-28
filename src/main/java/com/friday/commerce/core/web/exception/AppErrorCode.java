@@ -2,6 +2,7 @@ package com.friday.commerce.core.web.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties.Http;
 import org.springframework.http.HttpStatus;
 
 
@@ -15,6 +16,7 @@ public enum AppErrorCode implements ErrorCode {
     GATEWAY_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "공통: 게이트웨이 응답 시간이 초과되었습니다."),
     DEPENDENCY_FAILURE(HttpStatus.BAD_GATEWAY, "공통: 외부/하위 시스템 연동에 실패했습니다."),
     IO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "공통: 입출력 처리 중 오류가 발생했습니다."),
+    REQUEST_CONTEXT_NOT_FOUND(HttpStatus.NOT_FOUND,"공통: 요청 컨텍스트를 찾을 수 없습니다."),
 
     // 요청/형식/프로토콜
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "공통: 잘못된 입력입니다."),
@@ -35,6 +37,8 @@ public enum AppErrorCode implements ErrorCode {
     // [헤더/메타데이터]
     INVALID_HEADER(HttpStatus.BAD_REQUEST, "공통: 잘못된 헤더 정보입니다."),
     MISSING_HEADER(HttpStatus.BAD_REQUEST, "공통: 필수 헤더가 누락되었습니다."),
+    MISSING_HEADER_USER_ROLE(HttpStatus.BAD_REQUEST, "공통: 회원 권한 헤더가 누락되었습니다."),
+    INVALID_HEADER_USER_ROLE(HttpStatus.BAD_REQUEST, "공통: 값이 올바른 회원 권한 형식이 아닙니다."),
     INVALID_QUERY_PARAMETER(HttpStatus.BAD_REQUEST, "공통: 잘못된 쿼리 파라미터입니다."),
 
     // [인증/인가 (공통)]

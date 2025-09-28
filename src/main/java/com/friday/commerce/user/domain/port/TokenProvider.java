@@ -1,6 +1,6 @@
 package com.friday.commerce.user.domain.port;
 
-import com.friday.commerce.user.domain.entity.UserRole;
+import com.friday.commerce.core.security.model.UserRole;
 
 public interface TokenProvider {
 
