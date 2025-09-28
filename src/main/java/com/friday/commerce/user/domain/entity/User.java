@@ -170,4 +170,12 @@ public class User {
             throw new IllegalArgumentException("Address not owned by this user: " + addressId);
         }
     }
+
+    public com.friday.commerce.core.security.model.UserRole toCoreRole() {
+        return switch (this.userRole) {
+            case USER -> com.friday.commerce.core.security.model.UserRole.USER;
+            case SELLER -> com.friday.commerce.core.security.model.UserRole.SELLER;
+            case ADMIN -> com.friday.commerce.core.security.model.UserRole.ADMIN;
+        };
+    }
 }

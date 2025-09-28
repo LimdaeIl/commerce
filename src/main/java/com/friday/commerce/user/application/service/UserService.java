@@ -141,7 +141,7 @@ class UserService implements UserUseCase {
         verifyUserPassword(request.password(), user.getPassword());
 
         // 2) 토큰 발급
-        String at = tokenProvider.issueAt(user.getUserId(), user.getUserRole());
+        String at = tokenProvider.issueAt(user.getUserId(), user.toCoreRole());
         String rt = tokenProvider.issueRt(user.getUserId());
 
         // 3) jti/TTL 산출
@@ -233,7 +233,7 @@ class UserService implements UserUseCase {
         User userById = findUserById(rtUserId);
 
         // 토큰 발급
-        String newAt = tokenProvider.issueAt(rtUserId, userById.getUserRole());
+        String newAt = tokenProvider.issueAt(rtUserId, userById.toCoreRole());
         String newRt = tokenProvider.issueRt(rtUserId);
 
         // jti/TTL 산출
