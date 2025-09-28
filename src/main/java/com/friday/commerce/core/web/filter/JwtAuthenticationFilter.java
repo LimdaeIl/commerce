@@ -25,17 +25,16 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * JWT 인증 필터 (Spring Security 미사용)
  *
  * <p>경로 정책에 따라 JWT를 처리한다:
- * - EXCLUDE  : 완전 공개. 토큰이 있어도/깨져도 인증을 시도하지 않고 즉시 통과
- * - OPTIONAL : 토큰이 있으면 검증 후 request attribute(userId/role) 세팅, 없거나 깨져도 통과
- * - REQUIRED : 토큰 필수. 없거나 유효하지 않으면 AppException(401) 발생
+ * - EXCLUDE  : 완전 공개. 토큰이 있어도/깨져도 인증을 시도하지 않고 즉시 통과 - OPTIONAL : 토큰이 있으면 검증 후 request
+ * attribute(userId/role) 세팅, 없거나 깨져도 통과 - REQUIRED : 토큰 필수. 없거나 유효하지 않으면 AppException(401) 발생
  *
  * <p>검증 성공 시 아래 request attribute를 세팅한다:
- * - {@code AuthKeys.Attr.USER_ID}  : Long
- * - {@code AuthKeys.Attr.USER_ROLE}: String(또는 enum을 쓴다면 해당 타입)
+ * - {@code AuthKeys.Attr.USER_ID}  : Long - {@code AuthKeys.Attr.USER_ROLE}: String(또는 enum을 쓴다면 해당
+ * 타입)
  *
  * <p>주의:
- * - 이 필터는 AppException만 던지고, JSON 응답은 상위 {@code ExceptionHandlingFilter}가 표준 포맷으로 변환한다.
- * - 절대 토큰 원문/민감 정보를 로그에 남기지 않는다.
+ * - 이 필터는 AppException만 던지고, JSON 응답은 상위 {@code ExceptionHandlingFilter}가 표준 포맷으로 변환한다. - 절대 토큰
+ * 원문/민감 정보를 로그에 남기지 않는다.
  */
 @Slf4j(topic = "JwtAuthenticationFilter")
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -78,8 +77,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Stream<String> stream = Stream.of(pattern);
 
         // "/foo/**" → "/foo"도 매칭
-        if (pattern.endsWith("/**")) {
-            stream = Stream.concat(stream, Stream.of(pattern.substring(0, pattern.length() - 3)));
+        if (pattern.endsWith("/**") && pattern.length() > 3) {
+            String trimmed = pattern.substring(0, pattern.length() - 3);
+            if (StringUtils.hasText(trimmed)) {
+                stream = Stream.concat(stream, Stream.of(trimmed));
+            }
         }
         // "/foo/" → "/foo"도 매칭
         if (pattern.endsWith("/") && pattern.length() > 1) {
@@ -205,9 +207,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * AccessToken 추출 (헤더 우선, 없으면 쿠키 fallback).
-     * - Authorization: "Bearer <token>" (대소문자 무시)
-     * - 쿠키: properties.cookieFallback=true일 때만 properties.atCookie 이름으로 검색
+     * AccessToken 추출 (헤더 우선, 없으면 쿠키 fallback). - Authorization: "Bearer <token>" (대소문자 무시) - 쿠키:
+     * properties.cookieFallback=true일 때만 properties.atCookie 이름으로 검색
      */
     private String extractAtByHeaderOrCookie(HttpServletRequest request) {
         // 1) Authorization 헤더
