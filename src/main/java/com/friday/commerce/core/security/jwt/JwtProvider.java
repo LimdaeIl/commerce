@@ -109,7 +109,11 @@ public class JwtProvider {
 
     public String getAtUserRole(String at) {
         Claims c = parseAtClaims(at);
-        return c.get(CLAIM_USER_ROLE).toString();
+        String role = c.get(CLAIM_USER_ROLE, String.class);
+        if (role == null || role.isBlank()) {
+            throw new TokenException(JwtErrorCode.INVALID_CLAIMS);
+        }
+        return role;
     }
 
 
