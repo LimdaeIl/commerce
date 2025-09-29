@@ -16,7 +16,7 @@ import com.friday.commerce.user.application.dto.response.SendCodeEmailResponse;
 import com.friday.commerce.user.application.dto.response.SignInResponse;
 import com.friday.commerce.user.application.dto.response.SignUpResponse;
 import com.friday.commerce.user.application.dto.response.VerifyCodeEmailResponse;
-import com.friday.commerce.user.application.usecase.UserUseCase;
+import com.friday.commerce.user.application.usecase.AuthUsecase;
 import com.friday.commerce.user.domain.entity.User;
 import com.friday.commerce.user.domain.entity.UserAddress;
 import com.friday.commerce.user.domain.entity.UserAgreement;
@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
 @Slf4j(topic = "UserService")
 @RequiredArgsConstructor
 @Service
-class UserService implements UserUseCase {
+class UserService implements AuthUsecase {
 
     private final Snowflake snowflake;
     private final UserRepository userRepository;
