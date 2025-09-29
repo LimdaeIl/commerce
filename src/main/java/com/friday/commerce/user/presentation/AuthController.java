@@ -11,7 +11,7 @@ import com.friday.commerce.user.application.dto.response.SendCodeEmailResponse;
 import com.friday.commerce.user.application.dto.response.SignInResponse;
 import com.friday.commerce.user.application.dto.response.SignUpResponse;
 import com.friday.commerce.user.application.dto.response.VerifyCodeEmailResponse;
-import com.friday.commerce.user.application.usecase.UserUseCase;
+import com.friday.commerce.user.application.usecase.AuthUsecase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,13 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthController {
 
-    private final UserUseCase userUseCase;
+    private final AuthUsecase authUsecase;
 
     @PostMapping("/sign-up")
     public ResponseEntity<SignUpResponse> signUp(
             @RequestBody @Valid SignUpRequest request
     ) {
-        SignUpResponse response = userUseCase.signUp(request);
+        SignUpResponse response = authUsecase.signUp(request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -44,7 +44,7 @@ public class AuthController {
     public ResponseEntity<SignInResponse> signIn(
             @RequestBody @Valid SignInRequest request
     ) {
-        SignInResponse response = userUseCase.signIn(request);
+        SignInResponse response = authUsecase.signIn(request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -56,7 +56,7 @@ public class AuthController {
             @RequestHeader(name = "Authorization") String authHeader,
             @RequestBody @Valid LogoutRequest request
     ) {
-        userUseCase.logout(authHeader, request);
+        authUsecase.logout(authHeader, request);
 
         return ResponseEntity
                 .noContent()
@@ -68,7 +68,7 @@ public class AuthController {
             @RequestHeader(name = "Authorization", required = false, defaultValue = "") String authHeader,
             @RequestBody @Valid ReIssueRequest request
     ) {
-        ReIssueResponse response = userUseCase.reIssue(authHeader, request);
+        ReIssueResponse response = authUsecase.reIssue(authHeader, request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -80,7 +80,7 @@ public class AuthController {
     public ResponseEntity<SendCodeEmailResponse> SendCodeEmail(
             @Valid @RequestBody SendCodeEmailRequest request
     ) {
-        SendCodeEmailResponse response = userUseCase.sendCodeEmail(request);
+        SendCodeEmailResponse response = authUsecase.sendCodeEmail(request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -91,7 +91,7 @@ public class AuthController {
     public ResponseEntity<VerifyCodeEmailResponse> verifyCodeEmail(
             @Valid @RequestBody VerifyCodeEmailRequest request
     ) {
-        VerifyCodeEmailResponse response = userUseCase.verifyCodeEmail(request);
+        VerifyCodeEmailResponse response = authUsecase.verifyCodeEmail(request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
