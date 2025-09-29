@@ -12,7 +12,7 @@ import com.friday.commerce.user.application.dto.response.SignInResponse;
 import com.friday.commerce.user.application.dto.response.SignUpResponse;
 import com.friday.commerce.user.application.dto.response.VerifyCodeEmailResponse;
 
-public interface UserUseCase {
+public interface AuthUsecase {
 
     SignUpResponse signUp(SignUpRequest request);
 
