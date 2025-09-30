@@ -1,13 +1,18 @@
 package com.friday.commerce.user.application.dto.auth.response;
 
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.friday.commerce.core.security.model.UserRole;
 import com.friday.commerce.user.domain.entity.User;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Builder;
-import com.friday.commerce.core.security.model.UserRole;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(access = AccessLevel.PRIVATE)
 public record SignUpResponse(
         Long userId,
@@ -16,8 +21,8 @@ public record SignUpResponse(
         UserRole userRole,
         LocalDateTime createdAt,
         boolean isLocked,
-        UserAgreement userAgreement,
-        List<UserAddress> userAddresses
+        Agreement userAgreement,
+        List<Address> userAddresses
 ) {
 
     public static SignUpResponse from(User user) {
@@ -25,24 +30,25 @@ public record SignUpResponse(
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .username(user.getUsername())
-                .userRole(user.toCoreRole()) // 내부 enum → core enum 변환
+                .userRole(user.toCoreRole())
                 .createdAt(user.getCreatedAt())
                 .isLocked(Boolean.TRUE.equals(user.getIsLocked()))
-                .userAgreement(UserAgreement.from(user))
-                .userAddresses(UserAddress.from(user))
+                .userAgreement(Agreement.from(user))
+                .userAddresses(Address.from(user))
                 .build();
     }
 
-    @Builder(access = AccessLevel.PRIVATE)
-    public record UserAgreement(
+    // 외부 노출 막기: private 중첩 record + 필드 직렬화
+    @JsonAutoDetect(fieldVisibility = ANY)
+    private record Agreement(
             boolean termsOfService,
             boolean privacy,
             boolean marketing,
             LocalDateTime agreedAt
     ) {
-        public static UserAgreement from(User user) {
+        static Agreement from(User user) {
             var ua = user.getUserAgreement();
-            return new UserAgreement(
+            return new Agreement(
                     ua.isTermsOfService(),
                     ua.isPrivacy(),
                     ua.isMarketing(),
@@ -51,8 +57,9 @@ public record SignUpResponse(
         }
     }
 
-    @Builder(access = AccessLevel.PRIVATE)
-    public record UserAddress(
+    // 외부 노출 막기: private 중첩 record + 필드 직렬화
+    @JsonAutoDetect(fieldVisibility = ANY)
+    private record Address(
             Long addressId,
             String zipCode,
             String addressLine1,
@@ -61,9 +68,9 @@ public record SignUpResponse(
             String state,
             boolean isDefault
     ) {
-        public static List<UserAddress> from(User user) {
+        static List<Address> from(User user) {
             return user.getUserAddresses().stream()
-                    .map(addr -> new UserAddress(
+                    .map(addr -> new Address(
                             addr.getAddressId(),
                             addr.getZipCode(),
                             addr.getAddressLine1(),
