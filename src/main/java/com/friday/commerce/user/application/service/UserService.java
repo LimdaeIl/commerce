@@ -107,12 +107,12 @@ class UserService implements AuthUseCase, UserUseCase {
         existsUserByEmail(request.getEmail());
         verifyAgreement(request);
 
-        var userAgreement = UserAgreement.create(
+        UserAgreement userAgreement = UserAgreement.create(
                 request.agreedTos(),
                 request.agreedPrivacy(),
                 request.agreedMarketing()
         );
-        var userAddress = UserAddress.create(
+        UserAddress userAddress = UserAddress.create(
                 request.zipCode(),
                 request.addressLine1(),
                 request.addressLine2(),
