@@ -85,7 +85,7 @@ class UserService implements AuthUseCase, UserUseCase {
      *
      * @return minutes (유효 시간, 분)
      */
-    private long createAndSendEmailCode(String email, String subject) {
+    private long createAndSendEmailCode(String email, String subject, String purpose) {
         ensureNotBlocked(email);
         ensureNotInCoolTime(email);
 
@@ -106,7 +106,7 @@ class UserService implements AuthUseCase, UserUseCase {
         long minutes = Math.max(emailVerificationPolicy.codeValidityDuration().toMinutes(), 1);
         String html = templateRenderer.render(
                 TEMPLATE_EMAIL_VERIFICATION,
-                Map.of("brand", BRAND, "code", code, "minutes", minutes)
+                Map.of("brand", BRAND, "code", code, "minutes", minutes, "purpose", purpose)
         );
 
         // 메일 발송
@@ -335,7 +335,7 @@ class UserService implements AuthUseCase, UserUseCase {
         final String email = normalizeEmail(request.email());
         existsUserByEmail(email); // 이미 등록된 이메일이면 예외
 
-        long minutes = createAndSendEmailCode(email, SUBJECT_SIGNUP);
+        long minutes = createAndSendEmailCode(email, SUBJECT_SIGNUP, "signup");
         return SendCodeEmailResponse.of(email, minutes);
     }
 
@@ -402,13 +402,14 @@ class UserService implements AuthUseCase, UserUseCase {
         }
         existsUserByEmail(newEmail); // 이미 등록된 이메일이면 예외
 
-        long minutes = createAndSendEmailCode(newEmail, SUBJECT_UPDATE);
+        long minutes = createAndSendEmailCode(newEmail, SUBJECT_UPDATE, "update");
         return SendCodeEmailResponse.of(newEmail, minutes);
     }
 
     @Transactional
     @Override
-    public void confirmUpdateEmail(String authHeader, CurrentUserInfo info, UpdateEmailConfirmRequest request) {
+    public void confirmUpdateEmail(String authHeader, CurrentUserInfo info,
+            UpdateEmailConfirmRequest request) {
         final String newEmail = normalizeEmail(request.newEmail());
         User user = findUserById(info.userId());
 
