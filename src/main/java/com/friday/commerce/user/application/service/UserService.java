@@ -384,7 +384,8 @@ class UserService implements AuthUseCase, UserUseCase {
         }
 
         // 새로운 비밀번호로 변경
-        user.updatePassword(passwordEncoder.encode(request.newPassword()), info.userId());
+        user.updatePassword(passwordEncoder.encode(request.newPassword()));
+        user.updated(info.userId());
 
         // 강제 로그아웃: 이전 AT, RT 무효화
         invalidateSession(authHeader, request.rt());
@@ -425,7 +426,8 @@ class UserService implements AuthUseCase, UserUseCase {
         existsUserByEmail(newEmail);
 
         // 이메일 변경
-        user.updateEmail(newEmail, info.userId());
+        user.updateEmail(newEmail);
+        user.updated(info.userId());
 
         // 강제 로그아웃(세션 무효화) - 보안상 기존 토큰 모두 폐기
         invalidateSession(authHeader, request.rt());
@@ -447,7 +449,8 @@ class UserService implements AuthUseCase, UserUseCase {
                 request.state()
         );
 
-        user.addAddress(info.userId(), userAddress);
+        user.addAddress(userAddress);
+        user.updated(info.userId());
         userRepository.flush(); // INSERT 수행 → IDENTITY 키 채번 완료
 
         return GetUserResponse.from(user);
@@ -466,6 +469,7 @@ class UserService implements AuthUseCase, UserUseCase {
         }
 
         user.setDefaultAddress(addressId); // 도메인 규칙: 단일 기본 주소 보장
+        user.updated(info.userId());
 
         return GetUserResponse.from(user); // JPA 더티체킹으로 플러시됨
     }
@@ -497,6 +501,8 @@ class UserService implements AuthUseCase, UserUseCase {
             UserAddress first = user.getUserAddresses().getFirst();
             user.setDefaultAddress(first.getAddressId());
         }
+
+        user.updated(info.userId());
 
         // 5) 응답
         return GetUserResponse.from(user);

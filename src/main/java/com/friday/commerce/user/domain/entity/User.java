@@ -136,7 +136,7 @@ public class User {
                 .build();
     }
 
-    public void addAddress(Long userId, UserAddress address) {
+    public void addAddress(UserAddress address) {
         if (address == null) {
             return;
         }
@@ -146,7 +146,6 @@ public class User {
         }
         this.userAddresses.add(address);
         address.setUser(this);
-        updated(userId);
     }
 
     public void removeAddress(UserAddress address) {
@@ -188,23 +187,22 @@ public class User {
         };
     }
 
-    public void updatePassword(String newPassword, Long userId) {
+    public void updatePassword(String newPassword) {
         if (newPassword == null || newPassword.isEmpty()) {
             throw new UserException(UserErrorCode.PASSWORD_NULL);
         }
         this.password = newPassword;
-        updated(userId);
     }
 
-    public void updateEmail(String newEmail, Long userId) {
+    public void updateEmail(String newEmail) {
         if (newEmail == null || newEmail.isEmpty()) {
             throw new UserException(UserErrorCode.EMAIL_NULL);
         }
         this.email = newEmail;
-        updated(userId);
     }
 
-    private void updated(Long userId) {
+
+    public void updated(Long userId) {
         this.updatedAt = LocalDateTime.now();
         this.updatedBy = userId;
     }
