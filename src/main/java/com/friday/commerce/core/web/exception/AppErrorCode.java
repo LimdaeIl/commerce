@@ -40,10 +40,13 @@ public enum AppErrorCode implements ErrorCode {
     MISSING_HEADER(HttpStatus.BAD_REQUEST, "공통: 필수 헤더가 누락되었습니다."),
     MISSING_HEADER_USER_ID(HttpStatus.BAD_REQUEST, "공통: 회원 ID 헤더가 누락되었습니다."),
     MISSING_HEADER_USER_ROLE(HttpStatus.BAD_REQUEST, "공통: 회원 권한 헤더가 누락되었습니다."),
-    INVALID_HEADER_USER_ID(HttpStatus.BAD_REQUEST, "공통: 회원 ID 헤더가 잘못된 값 입니다."),
+    INVALID_HEADER_USER_ID(HttpStatus.BAD_REQUEST, "공통: 회원 ID 헤더가 잘못된 값입니다."),
     INVALID_HEADER_USER_ID_NOT_INTEGER(HttpStatus.BAD_REQUEST, "공통: 회원 ID 헤더 값이 숫자가 아닙니다."),
     INVALID_HEADER_USER_ROLE(HttpStatus.BAD_REQUEST, "공통: 값이 올바른 회원 권한 형식이 아닙니다."),
     INVALID_QUERY_PARAMETER(HttpStatus.BAD_REQUEST, "공통: 잘못된 쿼리 파라미터입니다."),
+    NULL_USER_ROLE(HttpStatus.BAD_REQUEST, "공통: 권한이 NULL 입니다."),
+    EMPTY_USER_ROLE(HttpStatus.BAD_REQUEST, "공통: 권한이 빈 값입니다."),
+
 
     // [인증/인가 (공통)]
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "공통: 인증이 필요합니다."),
@@ -62,6 +65,8 @@ public enum AppErrorCode implements ErrorCode {
     OPTIMISTIC_LOCK_FAILED(HttpStatus.CONFLICT, "공통: 동시 수정으로 인해 갱신에 실패했습니다."),
     ILLEGAL_STATE(HttpStatus.BAD_REQUEST, "공통: 현재 상태에서 허용되지 않는 작업입니다."),
     ILLEGAL_ARGUMENT(HttpStatus.BAD_REQUEST, "공통: 잘못된 인자 값입니다."),
+    RESP_BODY_WRITE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "공통: 응답 본문을 생성/쓰기 중 오류가 발생했습니다."),
+    MEDIA_TYPE_NOT_ACCEPTABLE(HttpStatus.NOT_ACCEPTABLE, "공통: 요청한 응답 형식을 제공할 수 없습니다."),
 
     // Idempotency
     IDEMPOTENCY_KEY_REQUIRED(HttpStatus.BAD_REQUEST, "공통: Idempotency-Key 헤더가 필요합니다."),
