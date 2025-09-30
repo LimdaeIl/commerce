@@ -189,6 +189,14 @@ public class User {
         updated(userId);
     }
 
+    public void updateEmail(String newEmail, Long userId) {
+        if (newEmail == null || newEmail.isEmpty()) {
+            throw new UserException(UserErrorCode.EMAIL_NULL);
+        }
+        this.email = newEmail;
+        updated(userId);
+    }
+
     private void updated(Long userId) {
         this.updatedAt = LocalDateTime.now();
         this.updatedBy = userId;

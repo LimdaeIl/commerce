@@ -28,7 +28,7 @@ public record GetUserResponse(
     }
 
     @JsonAutoDetect(fieldVisibility = ANY) // 필드 기반 직렬화 허용
-    private static record Agreement(
+    private record Agreement(
             Boolean termsOfService,
             Boolean privacy,
             Boolean marketing
@@ -39,7 +39,7 @@ public record GetUserResponse(
     }
 
     @JsonAutoDetect(fieldVisibility = ANY) // 필드 기반 직렬화 허용
-    private static record Address(
+    private record Address(
             String zipCode,
             String addressLine1,
             String addressLine2,
