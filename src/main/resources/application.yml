@@ -149,6 +149,7 @@ security:
       exclude-path-patterns:
         - /actuator/**
         - /docs/**
+        - /api/v1/auth/**
       optional-path-patterns:
         - /users/**
       include-path-patterns:
