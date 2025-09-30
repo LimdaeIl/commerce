@@ -21,7 +21,9 @@ public enum UserErrorCode implements ErrorCode {
     PASSWORD_NULL(HttpStatus.BAD_REQUEST, "비밀번호: 비밀번호 입력은 필수입니다."),
 
     EMAIL_DUPLICATED(HttpStatus.CONFLICT, "이메일: 이미 사용 중인 이메일입니다."),
+    EMAIL_SAME_BEFORE(HttpStatus.CONFLICT, "이메일: 이전 이메일과 동일한 이메일 입니다."),
     EMAIL_INVALID(HttpStatus.BAD_REQUEST, "이메일: 이메일 형식이 올바르지 않습니다."),
+    EMAIL_NULL(HttpStatus.BAD_REQUEST, "이메일: 이메일 입력은 필수 입니다."),
     EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "이메일: 이메일을 찾을 수 없습니다."),
     USER_IS_LOCKED(HttpStatus.FORBIDDEN, "이메일: 삭제된 회원의 이메일 입니다."),
 

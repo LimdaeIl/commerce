@@ -4,6 +4,9 @@ import com.friday.commerce.core.security.annotation.CurrentUser;
 import com.friday.commerce.core.security.annotation.RequireRole;
 import com.friday.commerce.core.security.model.CurrentUserInfo;
 import com.friday.commerce.core.security.model.UserRole;
+import com.friday.commerce.user.application.dto.auth.response.SendCodeEmailResponse;
+import com.friday.commerce.user.application.dto.user.request.UpdateEmailConfirmRequest;
+import com.friday.commerce.user.application.dto.user.request.UpdateEmailRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdatePasswordRequest;
 import com.friday.commerce.user.application.dto.user.response.GetUserResponse;
 import com.friday.commerce.user.application.usecase.UserUseCase;
@@ -13,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,6 +53,30 @@ public class UserController {
         return ResponseEntity
                 .noContent()
                 .build();
+    }
+
+    @RequireRole({UserRole.USER, UserRole.SELLER, UserRole.ADMIN})
+    @PatchMapping("/email")
+    public ResponseEntity<SendCodeEmailResponse> updateEmail(
+            @RequestHeader(name = "Authorization", required = false, defaultValue = "") String authHeader,
+            @CurrentUser CurrentUserInfo info,
+            @RequestBody @Valid UpdateEmailRequest request
+            ) {
+        SendCodeEmailResponse response = userUseCase.updateEmail(authHeader, info, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @PostMapping("email/confirm")
+    public ResponseEntity<Void> confirmEmailChange(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @CurrentUser CurrentUserInfo info,
+            @Valid @RequestBody UpdateEmailConfirmRequest request
+    ) {
+        userUseCase.confirmUpdateEmail(authHeader, info, request);
+        return ResponseEntity.noContent().build();
     }
 
 }

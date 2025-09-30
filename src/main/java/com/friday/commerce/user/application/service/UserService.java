@@ -16,6 +16,8 @@ import com.friday.commerce.user.application.dto.auth.response.SendCodeEmailRespo
 import com.friday.commerce.user.application.dto.auth.response.SignInResponse;
 import com.friday.commerce.user.application.dto.auth.response.SignUpResponse;
 import com.friday.commerce.user.application.dto.auth.response.VerifyCodeEmailResponse;
+import com.friday.commerce.user.application.dto.user.request.UpdateEmailConfirmRequest;
+import com.friday.commerce.user.application.dto.user.request.UpdateEmailRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdatePasswordRequest;
 import com.friday.commerce.user.application.dto.user.response.GetUserResponse;
 import com.friday.commerce.user.application.usecase.AuthUseCase;
@@ -46,6 +48,11 @@ import org.springframework.util.StringUtils;
 @Service
 class UserService implements AuthUseCase, UserUseCase {
 
+    private static final String BRAND = "commerce";
+    private static final String TEMPLATE_EMAIL_VERIFICATION = "verification-code";
+    private static final String SUBJECT_SIGNUP = "[ commerce ] 회원가입 이메일 인증코드";
+    private static final String SUBJECT_UPDATE = "[ commerce ] 이메일 변경 인증코드";
+
     private final Snowflake snowflake;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -56,6 +63,102 @@ class UserService implements AuthUseCase, UserUseCase {
     private final MailSenderPort mailSender;
     private final EmailTemplateRendererPort templateRenderer;
 
+    private String normalizeEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private void ensureNotBlocked(String email) {
+        if (emailVerificationRepositoryPort.isBlocked(email)) {
+            throw new UserException(UserErrorCode.EMAIL_VERIFICATION_BLOCKED);
+        }
+    }
+
+    private void ensureNotInCoolTime(String email) {
+        if (emailVerificationRepositoryPort.inCooltime(email)) {
+            throw new UserException(UserErrorCode.EMAIL_VERIFICATION_COOLTIME);
+        }
+    }
+
+    /**
+     * 인증코드를 생성/저장하고, 쿨타임을 설정한 뒤 이메일을 발송한다.
+     *
+     * @return minutes (유효 시간, 분)
+     */
+    private long createAndSendEmailCode(String email, String subject, String purpose) {
+        ensureNotBlocked(email);
+        ensureNotInCoolTime(email);
+
+        // 코드 생성 및 저장
+        String code = generate6DigitCode();
+        emailVerificationRepositoryPort.saveCode(
+                email,
+                passwordEncoder.encode(code),
+                emailVerificationPolicy.codeValidityDuration()
+        );
+
+        // 쿨타임 설정
+        emailVerificationRepositoryPort.setCooltime(
+                email, emailVerificationPolicy.resendCooldownDuration()
+        );
+
+        // 템플릿 렌더링
+        long minutes = Math.max(emailVerificationPolicy.codeValidityDuration().toMinutes(), 1);
+        String html = templateRenderer.render(
+                TEMPLATE_EMAIL_VERIFICATION,
+                Map.of("brand", BRAND, "code", code, "minutes", minutes, "purpose", purpose)
+        );
+
+        // 메일 발송
+        mailSender.send(new EmailMessage(
+                null, // null이면 spring.mail.username 사용
+                email,
+                subject,
+                html
+        ));
+
+        return minutes;
+    }
+
+    /**
+     * 입력 코드 검증 로직(횟수 증가/차단/정리 포함).
+     *
+     * @return verifiedUntil (millis)
+     */
+    private long verifyEmailCodeInternal(String email, int codeInput) {
+        ensureNotBlocked(email);
+
+        String storedCode = emailVerificationRepositoryPort.getCode(email)
+                .orElseThrow(
+                        () -> new UserException(UserErrorCode.EMAIL_VERIFICATION_NOT_REQUESTED));
+
+        boolean ok = passwordEncoder.matches(String.valueOf(codeInput), storedCode);
+
+        if (!ok) {
+            long attempts = emailVerificationRepositoryPort.incrementAttempts(
+                    email, emailVerificationPolicy.codeValidityDuration()
+            );
+
+            if (attempts >= emailVerificationPolicy.maxAttemptCount()) {
+                // 일정 시간 Lock & 정리
+                emailVerificationRepositoryPort.block(email,
+                        emailVerificationPolicy.lockoutDuration());
+                emailVerificationRepositoryPort.deleteCode(email);
+                emailVerificationRepositoryPort.resetAttempts(email);
+            }
+            throw new UserException(UserErrorCode.EMAIL_VERIFY_CODE_MISMATCH);
+        }
+
+        // 성공 시 정리 + 인증표식 갱신
+        emailVerificationRepositoryPort.deleteCode(email);
+        emailVerificationRepositoryPort.resetAttempts(email);
+        emailVerificationRepositoryPort.clearVerified(email);
+        emailVerificationRepositoryPort.markVerified(
+                email, emailVerificationPolicy.successValidityDuration()
+        );
+
+        return System.currentTimeMillis() + emailVerificationPolicy.successValidityDuration()
+                .toMillis();
+    }
 
     private void verifyAgreement(SignUpRequest req) {
         if (!req.agreedTos()) {
@@ -80,8 +183,8 @@ class UserService implements AuthUseCase, UserUseCase {
         return userByEmail;
     }
 
-    private void verifyUserPassword(String password, String confirmPassword) {
-        if (!passwordEncoder.matches(password, confirmPassword)) {
+    private void verifyUserPassword(String rawPassword, String encodedPassword) {
+        if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
             throw new UserException(UserErrorCode.PASSWORD_INCORRECT);
         }
     }
@@ -90,7 +193,6 @@ class UserService implements AuthUseCase, UserUseCase {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
     }
-
 
     private void existsUserByEmail(String email) {
         if (userRepository.existsByEmail(email)) {
@@ -229,105 +331,19 @@ class UserService implements AuthUseCase, UserUseCase {
     @Transactional
     @Override
     public SendCodeEmailResponse sendCodeEmail(SendCodeEmailRequest request) {
-        final String email = request.email().trim().toLowerCase(Locale.ROOT);
+        final String email = normalizeEmail(request.email());
+        existsUserByEmail(email); // 이미 등록된 이메일이면 예외
 
-        // 이미 등록된 이메일이면 예외 발생
-        existsUserByEmail(email);
-
-        // 차단 상태 확인
-        if (emailVerificationRepositoryPort.isBlocked(email)) {
-            throw new UserException(UserErrorCode.EMAIL_VERIFICATION_BLOCKED);
-        }
-
-        // 쿨타임 체크
-        if (emailVerificationRepositoryPort.inCooltime(email)) {
-            throw new UserException(UserErrorCode.EMAIL_VERIFICATION_COOLTIME);
-        }
-
-        // 코드 6자리 생성
-        String code = generate6DigitCode();
-
-        // 코드 저장(코드 암호화)
-        emailVerificationRepositoryPort.saveCode(
-                email,
-                passwordEncoder.encode(code),
-                emailVerificationPolicy.codeValidityDuration()
-        );
-
-        // 쿨타임 세팅
-        emailVerificationRepositoryPort.setCooltime(
-                email,
-                emailVerificationPolicy.resendCooldownDuration()
-        );
-
-        // 렌더링
-        long minutes = Math.max(emailVerificationPolicy.codeValidityDuration().toMinutes(), 1);
-        String html = templateRenderer.render(
-                "verification-code",
-                Map.of("brand", "commerce", "code", code, "minutes", minutes)
-        );
-
-        // 메일 발송
-        mailSender.send(
-                new EmailMessage(
-                        null,  // from이 null이면 spring.mail.username 사용
-                        email,
-                        "[ commerce ] 이메일 인증코드",
-                        html
-                ));
-
-        // 응답
+        long minutes = createAndSendEmailCode(email, SUBJECT_SIGNUP, "signup");
         return SendCodeEmailResponse.of(email, minutes);
     }
+
 
     @Transactional
     @Override
     public VerifyCodeEmailResponse verifyCodeEmail(VerifyCodeEmailRequest request) {
-        final String email = request.email().trim().toLowerCase(Locale.ROOT);
-
-        // 차단 상태 확인
-        if (emailVerificationRepositoryPort.isBlocked(email)) {
-            throw new UserException(UserErrorCode.EMAIL_VERIFICATION_BLOCKED);
-        }
-
-        // 코드 조회
-        String storedCode = emailVerificationRepositoryPort.getCode(email)
-                .orElseThrow(
-                        () -> new UserException(UserErrorCode.EMAIL_VERIFICATION_NOT_REQUESTED));
-
-        // 코드 검증
-        String input = String.valueOf(request.code());
-        boolean ok = passwordEncoder.matches(input, storedCode);
-
-        // 코드가 틀린 경우
-        if (!ok) {
-            long attempts = emailVerificationRepositoryPort.incrementAttempts(
-                    email, emailVerificationPolicy.codeValidityDuration()
-            );
-
-            // 최대 코드 검증 횟수 초과하면 일정 시간만큼 Lock
-            if (attempts >= emailVerificationPolicy.maxAttemptCount()) {
-                emailVerificationRepositoryPort.block(email,
-                        emailVerificationPolicy.lockoutDuration());
-
-                emailVerificationRepositoryPort.deleteCode(email);
-                emailVerificationRepositoryPort.resetAttempts(email);
-            }
-            throw new UserException(UserErrorCode.EMAIL_VERIFY_CODE_MISMATCH);
-        }
-
-        // 코드 검증 성공 후 처리
-        emailVerificationRepositoryPort.deleteCode(email);
-        emailVerificationRepositoryPort.resetAttempts(email);
-        emailVerificationRepositoryPort.clearVerified(email);
-        emailVerificationRepositoryPort.markVerified(email,
-                emailVerificationPolicy.successValidityDuration());
-
-        // 인증 성공 유지 시간
-        long verifiedUntil =
-                System.currentTimeMillis() + emailVerificationPolicy.successValidityDuration()
-                        .toMillis();
-
+        final String email = normalizeEmail(request.email());
+        long verifiedUntil = verifyEmailCodeInternal(email, request.code());
         return VerifyCodeEmailResponse.of(email, verifiedUntil);
     }
 
@@ -373,6 +389,50 @@ class UserService implements AuthUseCase, UserUseCase {
         invalidateSession(authHeader, request.rt());
     }
 
+    @Transactional
+    @Override
+    public SendCodeEmailResponse updateEmail(String authHeader, CurrentUserInfo info,
+            UpdateEmailRequest request) {
+        final String newEmail = normalizeEmail(request.newEmail());
+        User user = findUserById(info.userId());
+
+        if (user.getEmail().equals(newEmail)) {
+            throw new UserException(UserErrorCode.EMAIL_SAME_BEFORE);
+        }
+        existsUserByEmail(newEmail); // 이미 등록된 이메일이면 예외
+
+        long minutes = createAndSendEmailCode(newEmail, SUBJECT_UPDATE, "update");
+        return SendCodeEmailResponse.of(newEmail, minutes);
+    }
+
+    @Transactional
+    @Override
+    public void confirmUpdateEmail(String authHeader, CurrentUserInfo info,
+            UpdateEmailConfirmRequest request) {
+        final String newEmail = normalizeEmail(request.newEmail());
+        User user = findUserById(info.userId());
+
+        // 자기 자신과 동일 이메일이면 예외
+        if (user.getEmail().equals(newEmail)) {
+            throw new UserException(UserErrorCode.EMAIL_SAME_BEFORE);
+        }
+
+        // 인증 코드 검증 (성공 시 내부적으로 코드 삭제/시도횟수 리셋/verified 마킹)
+        verifyEmailCodeInternal(newEmail, request.code());
+
+        // 최종 중복 재확인 (코드 발송과 검증 사이에 누군가 사용했을 수 있음)
+        existsUserByEmail(newEmail);
+
+        // 이메일 변경
+        user.updateEmail(newEmail, info.userId());
+
+        // 강제 로그아웃(세션 무효화) - 보안상 기존 토큰 모두 폐기
+        invalidateSession(authHeader, request.rt());
+
+        // verified 플래그 정리
+        emailVerificationRepositoryPort.clearVerified(newEmail);
+    }
+
     // 검증 + 블랙리스트 등록 + RT 삭제까지 한 번에
     private void invalidateSession(@Nullable String authHeader, String rt) {
         // RT JTI, 회원 ID 추출
@@ -404,7 +464,5 @@ class UserService implements AuthUseCase, UserUseCase {
 
         userCacheRepository.deleteRt(userId);
     }
-
-
 }
 
