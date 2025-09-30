@@ -351,6 +351,11 @@ class UserService implements AuthUseCase, UserUseCase {
             UpdatePasswordRequest request) {
         User user = findUserById(info.userId());
 
+        // RT 확인
+        if (!StringUtils.hasText(request.rt())) {
+            throw new UserException(UserErrorCode.RT_NOT_FOUND);
+        }
+
         // 비밀번호 재확인
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new UserException(UserErrorCode.PASSWORD_INCORRECT);

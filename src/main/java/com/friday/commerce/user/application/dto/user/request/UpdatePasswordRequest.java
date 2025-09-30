@@ -21,6 +21,7 @@ public record UpdatePasswordRequest(
         @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
         String newPassword,
 
+        @NotBlank(message = "리프레시 토큰: 토큰은 필수입니다.")
         String rt
 ) {
 
