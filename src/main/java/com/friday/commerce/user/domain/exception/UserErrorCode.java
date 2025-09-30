@@ -15,7 +15,7 @@ public enum UserErrorCode implements ErrorCode {
     RT_BLACKLIST(HttpStatus.FORBIDDEN, "회원: 해당 RT 토큰은 블랙리스트로 등록되어 있습니다."),
     AT_BLACKLIST(HttpStatus.FORBIDDEN, "회원: 해당 AT 토큰은 블랙리스트로 등록되어 있습니다."),
 
-
+    PASSWORD_SAME_BEFORE(HttpStatus.BAD_REQUEST, "비밀번호: 이전 비밀번호와 동일한 비밀번호 입니다."),
     PASSWORD_INVALID(HttpStatus.BAD_REQUEST, "비밀번호: 비밀번호 형식이 올바르지 않습니다."),
     PASSWORD_INCORRECT(HttpStatus.BAD_REQUEST, "비밀번호: 비밀번호가 틀립니다."),
     PASSWORD_NULL(HttpStatus.BAD_REQUEST, "비밀번호: 비밀번호 입력은 필수입니다."),

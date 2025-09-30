@@ -1,5 +1,7 @@
 package com.friday.commerce.user.domain.entity;
 
+import com.friday.commerce.user.domain.exception.UserErrorCode;
+import com.friday.commerce.user.domain.exception.UserException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -177,5 +179,18 @@ public class User {
             case SELLER -> com.friday.commerce.core.security.model.UserRole.SELLER;
             case ADMIN -> com.friday.commerce.core.security.model.UserRole.ADMIN;
         };
+    }
+
+    public void updatePassword(String newPassword, Long userId) {
+        if (newPassword == null || newPassword.isEmpty()) {
+            throw new UserException(UserErrorCode.PASSWORD_NULL);
+        }
+        this.password = newPassword;
+        updated(userId);
+    }
+
+    private void updated(Long userId) {
+        this.updatedAt = LocalDateTime.now();
+        this.updatedBy = userId;
     }
 }

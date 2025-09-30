@@ -16,6 +16,7 @@ import com.friday.commerce.user.application.dto.auth.response.SendCodeEmailRespo
 import com.friday.commerce.user.application.dto.auth.response.SignInResponse;
 import com.friday.commerce.user.application.dto.auth.response.SignUpResponse;
 import com.friday.commerce.user.application.dto.auth.response.VerifyCodeEmailResponse;
+import com.friday.commerce.user.application.dto.user.request.UpdatePasswordRequest;
 import com.friday.commerce.user.application.dto.user.response.GetUserResponse;
 import com.friday.commerce.user.application.usecase.AuthUseCase;
 import com.friday.commerce.user.application.usecase.UserUseCase;
@@ -29,6 +30,7 @@ import com.friday.commerce.user.domain.port.EmailVerificationRepositoryPort;
 import com.friday.commerce.user.domain.port.TokenProvider;
 import com.friday.commerce.user.domain.port.UserCacheRepository;
 import com.friday.commerce.user.domain.repository.UserRepository;
+import jakarta.annotation.Nullable;
 import java.security.SecureRandom;
 import java.util.Locale;
 import java.util.Map;
@@ -160,31 +162,7 @@ class UserService implements AuthUseCase, UserUseCase {
     @Transactional
     @Override
     public void logout(String authHeader, LogoutRequest request) {
-        // 토큰으로부터 회원 ID 추출
-        Long rtUserId = tokenProvider.getRtUserId(request.rt());
-
-        // 토큰(at, rt)에서 jti 추출 -> JwtProvider
-        String atJti = tokenProvider.getAtJti(authHeader);
-        String rtJti = tokenProvider.getRtJti(request.rt());
-
-        // 레디스 안에 RT 토큰과 요청 토큰의 jti 일치하는 지 확인 및 조회
-        String getRtJti = userCacheRepository.getRtJti(rtUserId)
-                .orElseThrow(() -> new UserException(UserErrorCode.RT_NOT_FOUND));
-
-        if (!getRtJti.equals(rtJti)) {
-            throw new UserException(UserErrorCode.RT_JTI_INCORRECT);
-        }
-
-        // 토큰(at, rt)에서 남은 시간 추출 -> JwtProvider
-        long atTtlMs = tokenProvider.getAtTtlMs(authHeader);
-        long rtTtlMs = tokenProvider.getRtTtlMs(request.rt());
-
-        // 토큰(at, rt)을 블랙리스트로 등록 -> JwtProvider
-        userCacheRepository.atSetBl(atJti, atTtlMs);
-        userCacheRepository.rtSetBl(rtJti, rtTtlMs);
-
-        // 토큰 삭제(rt) -> JwtProvider
-        userCacheRepository.deleteRt(rtUserId);
+        invalidateSession(authHeader, request.rt());
     }
 
     @Transactional
@@ -366,5 +344,60 @@ class UserService implements AuthUseCase, UserUseCase {
 
         return GetUserResponse.from(userById);
     }
+
+    @Transactional
+    @Override
+    public void updatePassword(String authHeader, CurrentUserInfo info,
+            UpdatePasswordRequest request) {
+        User user = findUserById(info.userId());
+
+        // RT 확인
+        if (!StringUtils.hasText(request.rt())) {
+            throw new UserException(UserErrorCode.RT_NOT_FOUND);
+        }
+
+        // 비밀번호 재확인
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new UserException(UserErrorCode.PASSWORD_INCORRECT);
+        }
+
+        // 비밀번호가 이전과 동일한 지
+        if (passwordEncoder.matches(request.newPassword(), user.getPassword())) {
+            throw new UserException(UserErrorCode.PASSWORD_SAME_BEFORE);
+        }
+
+        // 새로운 비밀번호로 변경
+        user.updatePassword(passwordEncoder.encode(request.newPassword()), info.userId());
+
+        // 강제 로그아웃: 이전 AT, RT 무효화
+        invalidateSession(authHeader, request.rt());
+    }
+
+    // 검증 + 블랙리스트 등록 + RT 삭제까지 한 번에
+    private void invalidateSession(@Nullable String authHeader, String rt) {
+        // RT JTI, 회원 ID 추출
+        Long userId = tokenProvider.getRtUserId(rt);
+        String rtJti = tokenProvider.getRtJti(rt);
+
+        // RT JTI 일치 여부 확인(세션 탈취 방지를 위한 핵심)
+        String storedRtJti = userCacheRepository.getRtJti(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.RT_NOT_FOUND));
+        if (!storedRtJti.equals(rtJti)) throw new UserException(UserErrorCode.RT_JTI_INCORRECT);
+
+        // RT 블랙리스트 등록
+        long rtTtlMs = tokenProvider.getRtTtlMs(rt);
+        userCacheRepository.rtSetBl(rtJti, rtTtlMs);
+
+        // AT가 있으면 함께 블랙리스트
+        if (StringUtils.hasText(authHeader)) {
+            String atJti = tokenProvider.getAtJti(authHeader);
+            long atTtlMs = tokenProvider.getAtTtlMs(authHeader);
+            userCacheRepository.atSetBl(atJti, atTtlMs);
+        }
+
+        userCacheRepository.deleteRt(userId);
+    }
+
+
 }
 
