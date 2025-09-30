@@ -2,6 +2,7 @@ package com.friday.commerce.core.web.filter;
 
 import com.friday.commerce.core.security.jwt.JwtProvider;
 import com.friday.commerce.core.security.jwt.TokenException;
+import com.friday.commerce.core.security.model.UserRole;
 import com.friday.commerce.core.utils.AuthKeys;
 import com.friday.commerce.core.web.exception.AppErrorCode;
 import com.friday.commerce.core.web.exception.AppException;
@@ -137,6 +138,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     throw new AppException(AppErrorCode.INVALID_TOKEN);
                 }
 
+                UserRole roleEnum = UserRole.parseForToken(role); // 실패 시 401
                 setCurrentUserAttributes(request, userId, role);
 
             } catch (TokenException te) {
@@ -156,6 +158,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Long userId = jwtProvider.getAtUserId(at);
             String role = jwtProvider.getAtUserRole(at);
             if (userId != null && StringUtils.hasText(role)) {
+                UserRole roleEnum = UserRole.parseForToken(role); // 실패해도 OPTIONAL은 세팅 생략 후 통과
                 setCurrentUserAttributes(request, userId, role);
             }
         } catch (TokenException ignore) {
@@ -238,7 +241,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void setCurrentUserAttributes(HttpServletRequest request, Long userId, String role) {
         request.setAttribute(AuthKeys.Attr.USER_ID, userId);
-        request.setAttribute(AuthKeys.Attr.USER_ROLE, role);
+        request.setAttribute(AuthKeys.Attr.USER_ROLE, role); // Enum 저장
         if (log.isDebugEnabled()) {
             log.debug("JWT OK -> userId={}, role={}, uri={}", userId, role,
                     request.getRequestURI());

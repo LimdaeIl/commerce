@@ -8,8 +8,7 @@ import com.friday.commerce.core.web.exception.AppErrorCode;
 import com.friday.commerce.core.web.exception.AppException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.EnumSet;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -42,12 +41,14 @@ public class AuthorizationAspect {
         if (required.length == 0) {
             return;
         }
-
-        Set<UserRole> allowedUserRole = Arrays.stream(required).collect(Collectors.toSet());
+        EnumSet<UserRole> allowedUserRole = EnumSet.noneOf(UserRole.class);
+        allowedUserRole.addAll(Arrays.asList(required));
 
         if (!allowedUserRole.contains(currentUserRole)) {
-            log.info("포함되지 않은 권한 거부: 현재 권한: {}, 허용 권한: {}", currentUserRole,
-                    Arrays.toString(required));
+            if (log.isDebugEnabled()) {
+                log.info("포함되지 않은 권한 거부: 현재 권한: {}, 허용 권한: {}", currentUserRole,
+                        Arrays.toString(required));
+            }
             throw new AppException(AppErrorCode.FORBIDDEN);
         }
 
@@ -79,10 +80,20 @@ public class AuthorizationAspect {
             throw new AppException(AppErrorCode.MISSING_HEADER_USER_ROLE);
         }
 
-        if (!(roleAttr instanceof UserRole userRole)) {
-            throw new AppException(AppErrorCode.INVALID_HEADER_USER_ROLE);
+        if (roleAttr instanceof UserRole userRole) {
+            return userRole;
         }
 
-        return userRole;
+        // 혹시 문자열이 들어온 경우만 방어적으로 파싱 → 실패 시 400
+        if (roleAttr instanceof String s) {
+            return UserRole.parseForHeader(s);
+        }
+
+        //  기타 타입은 형식 오류
+        if (log.isDebugEnabled()) {
+            log.debug("Unsupported USER_ROLE attr type: {}", roleAttr.getClass().getName());
+        }
+
+        throw new AppException(AppErrorCode.INVALID_HEADER_USER_ROLE);
     }
 }
