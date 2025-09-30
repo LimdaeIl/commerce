@@ -1,17 +1,17 @@
 package com.friday.commerce.user.presentation;
 
-import com.friday.commerce.user.application.dto.request.LogoutRequest;
-import com.friday.commerce.user.application.dto.request.ReIssueRequest;
-import com.friday.commerce.user.application.dto.request.SendCodeEmailRequest;
-import com.friday.commerce.user.application.dto.request.SignInRequest;
-import com.friday.commerce.user.application.dto.request.SignUpRequest;
-import com.friday.commerce.user.application.dto.request.VerifyCodeEmailRequest;
-import com.friday.commerce.user.application.dto.response.ReIssueResponse;
-import com.friday.commerce.user.application.dto.response.SendCodeEmailResponse;
-import com.friday.commerce.user.application.dto.response.SignInResponse;
-import com.friday.commerce.user.application.dto.response.SignUpResponse;
-import com.friday.commerce.user.application.dto.response.VerifyCodeEmailResponse;
-import com.friday.commerce.user.application.usecase.AuthUsecase;
+import com.friday.commerce.user.application.dto.auth.request.LogoutRequest;
+import com.friday.commerce.user.application.dto.auth.request.ReIssueRequest;
+import com.friday.commerce.user.application.dto.auth.request.SendCodeEmailRequest;
+import com.friday.commerce.user.application.dto.auth.request.SignInRequest;
+import com.friday.commerce.user.application.dto.auth.request.SignUpRequest;
+import com.friday.commerce.user.application.dto.auth.request.VerifyCodeEmailRequest;
+import com.friday.commerce.user.application.dto.auth.response.ReIssueResponse;
+import com.friday.commerce.user.application.dto.auth.response.SendCodeEmailResponse;
+import com.friday.commerce.user.application.dto.auth.response.SignInResponse;
+import com.friday.commerce.user.application.dto.auth.response.SignUpResponse;
+import com.friday.commerce.user.application.dto.auth.response.VerifyCodeEmailResponse;
+import com.friday.commerce.user.application.usecase.AuthUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthController {
 
-    private final AuthUsecase authUsecase;
+    private final AuthUseCase authUsecase;
 
     @PostMapping("/sign-up")
     public ResponseEntity<SignUpResponse> signUp(

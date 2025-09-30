@@ -1,18 +1,18 @@
 package com.friday.commerce.user.application.usecase;
 
-import com.friday.commerce.user.application.dto.request.LogoutRequest;
-import com.friday.commerce.user.application.dto.request.ReIssueRequest;
-import com.friday.commerce.user.application.dto.request.SendCodeEmailRequest;
-import com.friday.commerce.user.application.dto.request.SignInRequest;
-import com.friday.commerce.user.application.dto.request.SignUpRequest;
-import com.friday.commerce.user.application.dto.request.VerifyCodeEmailRequest;
-import com.friday.commerce.user.application.dto.response.ReIssueResponse;
-import com.friday.commerce.user.application.dto.response.SendCodeEmailResponse;
-import com.friday.commerce.user.application.dto.response.SignInResponse;
-import com.friday.commerce.user.application.dto.response.SignUpResponse;
-import com.friday.commerce.user.application.dto.response.VerifyCodeEmailResponse;
+import com.friday.commerce.user.application.dto.auth.request.LogoutRequest;
+import com.friday.commerce.user.application.dto.auth.request.ReIssueRequest;
+import com.friday.commerce.user.application.dto.auth.request.SendCodeEmailRequest;
+import com.friday.commerce.user.application.dto.auth.request.SignInRequest;
+import com.friday.commerce.user.application.dto.auth.request.SignUpRequest;
+import com.friday.commerce.user.application.dto.auth.request.VerifyCodeEmailRequest;
+import com.friday.commerce.user.application.dto.auth.response.ReIssueResponse;
+import com.friday.commerce.user.application.dto.auth.response.SendCodeEmailResponse;
+import com.friday.commerce.user.application.dto.auth.response.SignInResponse;
+import com.friday.commerce.user.application.dto.auth.response.SignUpResponse;
+import com.friday.commerce.user.application.dto.auth.response.VerifyCodeEmailResponse;
 
-public interface AuthUsecase {
+public interface AuthUseCase {
 
     SignUpResponse signUp(SignUpRequest request);
 
