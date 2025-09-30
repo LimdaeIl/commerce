@@ -5,7 +5,6 @@ import com.friday.commerce.core.mail.application.port.MailSenderPort;
 import com.friday.commerce.core.mail.domain.EmailMessage;
 import com.friday.commerce.core.security.model.CurrentUserInfo;
 import com.friday.commerce.core.utils.snowflake.Snowflake;
-import com.friday.commerce.core.web.exception.AppException;
 import com.friday.commerce.user.application.dto.auth.request.LogoutRequest;
 import com.friday.commerce.user.application.dto.auth.request.ReIssueRequest;
 import com.friday.commerce.user.application.dto.auth.request.SendCodeEmailRequest;
@@ -398,7 +397,7 @@ class UserService implements AuthUseCase, UserUseCase {
         User user = findUserById(info.userId());
 
         if (user.getEmail().equals(newEmail)) {
-            throw new AppException(UserErrorCode.EMAIL_SAME_BEFORE);
+            throw new UserException(UserErrorCode.EMAIL_SAME_BEFORE);
         }
         existsUserByEmail(newEmail); // 이미 등록된 이메일이면 예외
 
@@ -415,7 +414,7 @@ class UserService implements AuthUseCase, UserUseCase {
 
         // 자기 자신과 동일 이메일이면 예외
         if (user.getEmail().equals(newEmail)) {
-            throw new AppException(UserErrorCode.EMAIL_SAME_BEFORE);
+            throw new UserException(UserErrorCode.EMAIL_SAME_BEFORE);
         }
 
         // 인증 코드 검증 (성공 시 내부적으로 코드 삭제/시도횟수 리셋/verified 마킹)
