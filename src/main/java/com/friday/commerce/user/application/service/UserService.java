@@ -3,20 +3,22 @@ package com.friday.commerce.user.application.service;
 import com.friday.commerce.core.mail.application.port.EmailTemplateRendererPort;
 import com.friday.commerce.core.mail.application.port.MailSenderPort;
 import com.friday.commerce.core.mail.domain.EmailMessage;
+import com.friday.commerce.core.security.model.CurrentUserInfo;
 import com.friday.commerce.core.utils.snowflake.Snowflake;
-import com.friday.commerce.user.application.dto.request.LogoutRequest;
-import com.friday.commerce.user.application.dto.request.ReIssueRequest;
-import com.friday.commerce.user.application.dto.request.SendCodeEmailRequest;
-import com.friday.commerce.user.application.dto.request.SignInRequest;
-import com.friday.commerce.user.application.dto.request.SignUpRequest;
-import com.friday.commerce.user.application.dto.request.SignUpRequest.Agreement;
-import com.friday.commerce.user.application.dto.request.VerifyCodeEmailRequest;
-import com.friday.commerce.user.application.dto.response.ReIssueResponse;
-import com.friday.commerce.user.application.dto.response.SendCodeEmailResponse;
-import com.friday.commerce.user.application.dto.response.SignInResponse;
-import com.friday.commerce.user.application.dto.response.SignUpResponse;
-import com.friday.commerce.user.application.dto.response.VerifyCodeEmailResponse;
-import com.friday.commerce.user.application.usecase.AuthUsecase;
+import com.friday.commerce.user.application.dto.auth.request.LogoutRequest;
+import com.friday.commerce.user.application.dto.auth.request.ReIssueRequest;
+import com.friday.commerce.user.application.dto.auth.request.SendCodeEmailRequest;
+import com.friday.commerce.user.application.dto.auth.request.SignInRequest;
+import com.friday.commerce.user.application.dto.auth.request.SignUpRequest;
+import com.friday.commerce.user.application.dto.auth.request.VerifyCodeEmailRequest;
+import com.friday.commerce.user.application.dto.auth.response.ReIssueResponse;
+import com.friday.commerce.user.application.dto.auth.response.SendCodeEmailResponse;
+import com.friday.commerce.user.application.dto.auth.response.SignInResponse;
+import com.friday.commerce.user.application.dto.auth.response.SignUpResponse;
+import com.friday.commerce.user.application.dto.auth.response.VerifyCodeEmailResponse;
+import com.friday.commerce.user.application.dto.user.response.GetUserResponse;
+import com.friday.commerce.user.application.usecase.AuthUseCase;
+import com.friday.commerce.user.application.usecase.UserUseCase;
 import com.friday.commerce.user.domain.entity.User;
 import com.friday.commerce.user.domain.entity.UserAddress;
 import com.friday.commerce.user.domain.entity.UserAgreement;
@@ -40,7 +42,7 @@ import org.springframework.util.StringUtils;
 @Slf4j(topic = "UserService")
 @RequiredArgsConstructor
 @Service
-class UserService implements AuthUsecase {
+class UserService implements AuthUseCase, UserUseCase {
 
     private final Snowflake snowflake;
     private final UserRepository userRepository;
@@ -53,14 +55,14 @@ class UserService implements AuthUsecase {
     private final EmailTemplateRendererPort templateRenderer;
 
 
-    private void verifyAgreement(Agreement agreement) {
-        if (!agreement.termsOfService()) {
+    private void verifyAgreement(SignUpRequest req) {
+        if (!req.agreedTos()) {
             throw new UserException(UserErrorCode.AGREEMENT_TERMS_OF_SERVICE);
         }
-        if (!agreement.privacy()) {
+        if (!req.agreedPrivacy()) {
             throw new UserException(UserErrorCode.AGREEMENT_PRIVACY);
         }
-        if (!agreement.marketing()) {
+        if (!req.agreedMarketing()) {
             throw new UserException(UserErrorCode.AGREEMENT_MARKETING);
         }
     }
@@ -102,28 +104,27 @@ class UserService implements AuthUsecase {
     @Transactional
     @Override
     public SignUpResponse signUp(SignUpRequest request) {
-        existsUserByEmail(request.email());
-        verifyAgreement(request.agreement());
+        existsUserByEmail(request.getEmail());
+        verifyAgreement(request);
 
-        UserAgreement userAgreement = UserAgreement.create(
-                request.agreement().termsOfService(),
-                request.agreement().privacy(),
-                request.agreement().marketing()
+        var userAgreement = UserAgreement.create(
+                request.agreedTos(),
+                request.agreedPrivacy(),
+                request.agreedMarketing()
         );
-
-        UserAddress userAddress = UserAddress.create(
-                request.address().zipCode(),
-                request.address().addressLine1(),
-                request.address().addressLine2(),
-                request.address().city(),
-                request.address().state()
+        var userAddress = UserAddress.create(
+                request.zipCode(),
+                request.addressLine1(),
+                request.addressLine2(),
+                request.city(),
+                request.state()
         );
 
         User user = User.create(
                 snowflake.nextId(),
-                request.email(),
-                passwordEncoder.encode(request.password()),
-                request.username(),
+                request.getEmail(),
+                passwordEncoder.encode(request.getPassword()),
+                request.getUsername(),
                 userAgreement,
                 userAddress
         );
@@ -356,6 +357,14 @@ class UserService implements AuthUsecase {
         SecureRandom r = new SecureRandom();
         int n = 100000 + r.nextInt(900000);
         return String.valueOf(n);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public GetUserResponse getUser(CurrentUserInfo info) {
+        User userById = findUserById(info.userId());
+
+        return GetUserResponse.from(userById);
     }
 }
 
