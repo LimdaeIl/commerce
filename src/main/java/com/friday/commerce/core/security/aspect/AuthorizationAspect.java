@@ -46,7 +46,7 @@ public class AuthorizationAspect {
 
         if (!allowedUserRole.contains(currentUserRole)) {
             if (log.isDebugEnabled()) {
-                log.info("포함되지 않은 권한 거부: 현재 권한: {}, 허용 권한: {}", currentUserRole,
+                log.debug("포함되지 않은 권한 거부: 현재 권한: {}, 허용 권한: {}", currentUserRole,
                         Arrays.toString(required));
             }
             throw new AppException(AppErrorCode.FORBIDDEN);

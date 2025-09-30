@@ -139,7 +139,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
 
                 UserRole roleEnum = UserRole.parseForToken(role); // 실패 시 401
-                setCurrentUserAttributes(request, userId, role);
+                setCurrentUserAttributes(request, userId, roleEnum);
 
             } catch (TokenException te) {
                 // JwtProvider 단계에서 발생한 만료/서명오류/클레임 오류 등
@@ -159,7 +159,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String role = jwtProvider.getAtUserRole(at);
             if (userId != null && StringUtils.hasText(role)) {
                 UserRole roleEnum = UserRole.parseForToken(role); // 실패해도 OPTIONAL은 세팅 생략 후 통과
-                setCurrentUserAttributes(request, userId, role);
+                setCurrentUserAttributes(request, userId, roleEnum);
             }
         } catch (TokenException ignore) {
             // OPTIONAL: 깨진 토큰이면 속성 세팅 없이 그냥 통과
@@ -239,7 +239,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private void setCurrentUserAttributes(HttpServletRequest request, Long userId, String role) {
+    private void setCurrentUserAttributes(HttpServletRequest request, Long userId, UserRole role) {
         request.setAttribute(AuthKeys.Attr.USER_ID, userId);
         request.setAttribute(AuthKeys.Attr.USER_ROLE, role); // Enum 저장
         if (log.isDebugEnabled()) {

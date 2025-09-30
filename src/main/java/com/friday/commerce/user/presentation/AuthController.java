@@ -77,7 +77,7 @@ public class AuthController {
 
 
     @PostMapping("/email/send-code")
-    public ResponseEntity<SendCodeEmailResponse> SendCodeEmail(
+    public ResponseEntity<SendCodeEmailResponse> sendCodeEmail(
             @Valid @RequestBody SendCodeEmailRequest request
     ) {
         SendCodeEmailResponse response = authUsecase.sendCodeEmail(request);
