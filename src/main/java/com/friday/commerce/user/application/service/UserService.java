@@ -379,10 +379,17 @@ class UserService implements AuthUseCase, UserUseCase {
         Long userId = tokenProvider.getRtUserId(rt);
         String rtJti = tokenProvider.getRtJti(rt);
 
+        // 블랙리스트 등록된 RT 인지 확인
+        if (userCacheRepository.isRtBl(rtJti)) {
+            throw new UserException(UserErrorCode.RT_BLACKLIST);
+        }
+
         // RT JTI 일치 여부 확인(세션 탈취 방지를 위한 핵심)
         String storedRtJti = userCacheRepository.getRtJti(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.RT_NOT_FOUND));
-        if (!storedRtJti.equals(rtJti)) throw new UserException(UserErrorCode.RT_JTI_INCORRECT);
+        if (!storedRtJti.equals(rtJti)) {
+            throw new UserException(UserErrorCode.RT_JTI_INCORRECT);
+        }
 
         // RT 블랙리스트 등록
         long rtTtlMs = tokenProvider.getRtTtlMs(rt);
