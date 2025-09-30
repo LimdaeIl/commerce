@@ -1,4 +1,4 @@
-package com.friday.commerce.user.application.dto.request;
+package com.friday.commerce.user.application.dto.auth.request;
 
 import jakarta.validation.constraints.NotNull;
 

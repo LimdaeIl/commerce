@@ -1,4 +1,4 @@
-package com.friday.commerce.user.application.dto.response;
+package com.friday.commerce.user.application.dto.auth.response;
 
 import lombok.AccessLevel;
 import lombok.Builder;
