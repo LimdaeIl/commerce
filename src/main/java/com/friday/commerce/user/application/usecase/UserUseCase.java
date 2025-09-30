@@ -14,7 +14,7 @@ public interface UserUseCase {
 
     void updatePassword(String authHeader, CurrentUserInfo info, UpdatePasswordRequest request);
 
-    SendCodeEmailResponse updateEmail(String authHeader, CurrentUserInfo info, UpdateEmailRequest request);
+    SendCodeEmailResponse updateEmail(CurrentUserInfo info, UpdateEmailRequest request);
 
     void confirmUpdateEmail(String authHeader, CurrentUserInfo info, UpdateEmailConfirmRequest request);
 }
