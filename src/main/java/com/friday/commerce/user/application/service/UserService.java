@@ -489,7 +489,7 @@ class UserService implements AuthUseCase, UserUseCase {
         boolean wasDefault = Boolean.TRUE.equals(target.getIsDefault());
 
         // 삭제: 컬렉션에서 제거 + orphanRemoval=true 로 영속성 컨텍스트에서 삭제
-        user.deleteAddress(target);
+        user.removeAddress(target);
 
         // 기본 주소를 지웠다면, 남아있는 첫 번째 주소를 기본으로 설정
         if (wasDefault) {

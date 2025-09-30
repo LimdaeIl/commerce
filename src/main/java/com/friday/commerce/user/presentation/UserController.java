@@ -71,6 +71,7 @@ public class UserController {
                 .body(response);
     }
 
+    @RequireRole({UserRole.USER, UserRole.SELLER, UserRole.ADMIN})
     @PostMapping("/email/confirm")
     public ResponseEntity<Void> confirmEmailChange(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
@@ -81,6 +82,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @RequireRole({UserRole.USER, UserRole.SELLER, UserRole.ADMIN})
     @PostMapping("/addresses")
     public ResponseEntity<GetUserResponse> registerAddress(
             @CurrentUser CurrentUserInfo info,
@@ -93,6 +95,7 @@ public class UserController {
                 .body(response);
     }
 
+    @RequireRole({UserRole.USER, UserRole.SELLER, UserRole.ADMIN})
     @PostMapping("/addresses/{addressId}/default")
     public ResponseEntity<GetUserResponse> updateDefaultAddress(
             @PathVariable Long addressId,
@@ -104,6 +107,7 @@ public class UserController {
                 .body(response);
     }
 
+    @RequireRole({UserRole.USER, UserRole.SELLER, UserRole.ADMIN})
     @DeleteMapping("/addresses/{addressId}")
     public ResponseEntity<GetUserResponse> deleteAddress(
             @PathVariable Long addressId,

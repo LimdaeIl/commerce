@@ -99,10 +99,6 @@ public class User {
             UserAgreement userAgreement,
             UserAddress userAddresses
     ) {
-        if (userAddresses != null) {
-            addAddress(userId, userAddresses);
-        }
-
         LocalDateTime now = LocalDateTime.now();
         this.userId = userId;
         this.email = email;
@@ -115,6 +111,11 @@ public class User {
         this.deletedAt = null;
         this.deletedBy = null;
 
+        if (userAddresses != null) {
+            userAddresses.setDefault(true);
+            this.userAddresses.add(userAddresses);
+            userAddresses.setUser(this);
+        }
     }
 
     public static User create(
@@ -136,7 +137,9 @@ public class User {
     }
 
     public void addAddress(Long userId, UserAddress address) {
-        if (address == null) return;
+        if (address == null) {
+            return;
+        }
         // 첫 주소라면 기본으로
         if (this.userAddresses.isEmpty()) {
             address.setDefault(true);
@@ -146,7 +149,7 @@ public class User {
         updated(userId);
     }
 
-    public void deleteAddress(UserAddress address) {
+    public void removeAddress(UserAddress address) {
         if (address == null) {
             return;
         }
