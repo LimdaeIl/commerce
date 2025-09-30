@@ -69,7 +69,7 @@ public class UserController {
                 .body(response);
     }
 
-    @PostMapping("/v1/users/email/confirm")
+    @PostMapping("email/confirm")
     public ResponseEntity<Void> confirmEmailChange(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @CurrentUser CurrentUserInfo info,

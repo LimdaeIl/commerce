@@ -51,7 +51,7 @@ Authorization: Bearer {{at}}
 }
 
 ### 이메일 코드 검증
-POST http://localhost:10000/api/v1/users/v1/users/email/confirm
+POST http://localhost:10000/api/v1/users/email/confirm
 Content-Type: application/json
 Authorization: Bearer {{at}}
 
