@@ -391,7 +391,7 @@ class UserService implements AuthUseCase, UserUseCase {
 
     @Transactional
     @Override
-    public SendCodeEmailResponse updateEmail(String authHeader, CurrentUserInfo info,
+    public SendCodeEmailResponse updateEmail(CurrentUserInfo info,
             UpdateEmailRequest request) {
         final String newEmail = normalizeEmail(request.newEmail());
         User user = findUserById(info.userId());

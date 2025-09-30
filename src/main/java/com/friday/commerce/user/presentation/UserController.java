@@ -58,18 +58,17 @@ public class UserController {
     @RequireRole({UserRole.USER, UserRole.SELLER, UserRole.ADMIN})
     @PatchMapping("/email")
     public ResponseEntity<SendCodeEmailResponse> updateEmail(
-            @RequestHeader(name = "Authorization", required = false, defaultValue = "") String authHeader,
             @CurrentUser CurrentUserInfo info,
             @RequestBody @Valid UpdateEmailRequest request
             ) {
-        SendCodeEmailResponse response = userUseCase.updateEmail(authHeader, info, request);
+        SendCodeEmailResponse response = userUseCase.updateEmail(info, request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);
     }
 
-    @PostMapping("email/confirm")
+    @PostMapping("/email/confirm")
     public ResponseEntity<Void> confirmEmailChange(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @CurrentUser CurrentUserInfo info,
