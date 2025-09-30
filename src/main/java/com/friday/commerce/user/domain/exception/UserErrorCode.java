@@ -34,7 +34,10 @@ public enum UserErrorCode implements ErrorCode {
 
     AGREEMENT_TERMS_OF_SERVICE(HttpStatus.BAD_REQUEST, "동의: 서비스 동의 승인은 필수 입니다."),
     AGREEMENT_PRIVACY(HttpStatus.BAD_REQUEST, "동의: 개인정보 동의 승인은 필수 입니다."),
-    AGREEMENT_MARKETING(HttpStatus.BAD_REQUEST, "동의: 마케팅 활용 동의 승인은 필수 입니다.");
+    AGREEMENT_MARKETING(HttpStatus.BAD_REQUEST, "동의: 마케팅 활용 동의 승인은 필수 입니다."),
+
+    ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "주소: 회원 주소를 찾을 수 없습니다."),
+    ADDRESS_LAST_CANNOT_DELETE(HttpStatus.BAD_REQUEST, "주소: 회원 주소는 최소 1개 이상이어야만 합니다.");
 
     private final HttpStatus status;
     private final String message;

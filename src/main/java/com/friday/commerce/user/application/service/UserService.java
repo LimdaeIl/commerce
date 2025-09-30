@@ -16,6 +16,7 @@ import com.friday.commerce.user.application.dto.auth.response.SendCodeEmailRespo
 import com.friday.commerce.user.application.dto.auth.response.SignInResponse;
 import com.friday.commerce.user.application.dto.auth.response.SignUpResponse;
 import com.friday.commerce.user.application.dto.auth.response.VerifyCodeEmailResponse;
+import com.friday.commerce.user.application.dto.user.request.RegisterAddressRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdateEmailConfirmRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdateEmailRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdatePasswordRequest;
@@ -431,6 +432,74 @@ class UserService implements AuthUseCase, UserUseCase {
 
         // verified 플래그 정리
         emailVerificationRepositoryPort.clearVerified(newEmail);
+    }
+
+    @Transactional
+    @Override
+    public GetUserResponse registerAddress(CurrentUserInfo info, RegisterAddressRequest request) {
+        User user = findUserById(info.userId());
+
+        UserAddress userAddress = UserAddress.create(
+                request.zipCode(),
+                request.addressLine1(),
+                request.addressLine2(),
+                request.city(),
+                request.state()
+        );
+
+        user.addAddress(info.userId(), userAddress);
+        userRepository.flush(); // INSERT 수행 → IDENTITY 키 채번 완료
+
+        return GetUserResponse.from(user);
+    }
+
+    @Transactional
+    @Override
+    public GetUserResponse updateDefaultAddress(CurrentUserInfo info, Long addressId) {
+        User user = findUserById(info.userId());
+
+        // 소유권 검증
+        boolean existsAddress = user.getUserAddresses().stream()
+                .anyMatch(address -> addressId.equals(address.getAddressId()));
+        if (!existsAddress) {
+            throw new UserException(UserErrorCode.ADDRESS_NOT_FOUND); // or NOT_OWNED
+        }
+
+        user.setDefaultAddress(addressId); // 도메인 규칙: 단일 기본 주소 보장
+
+        return GetUserResponse.from(user); // JPA 더티체킹으로 플러시됨
+    }
+
+    @Transactional
+    @Override
+    public GetUserResponse deleteAddress(CurrentUserInfo info, Long addressId) {
+        User user = findUserById(info.userId());
+
+        // 주소는 최소 1개
+        if (user.getUserAddresses().size() <= 1) {
+            throw new UserException(UserErrorCode.ADDRESS_LAST_CANNOT_DELETE);
+        }
+
+        // 내 주소인지 확인 + 타겟 조회
+        UserAddress target = user.getUserAddresses().stream()
+                .filter(address -> addressId.equals(address.getAddressId()))
+                .findFirst()
+                .orElseThrow(() -> new UserException(UserErrorCode.ADDRESS_NOT_FOUND));
+
+        boolean wasDefault = Boolean.TRUE.equals(target.getIsDefault());
+
+        // 삭제: 컬렉션에서 제거 + orphanRemoval=true 로 영속성 컨텍스트에서 삭제
+        user.removeAddress(target);
+
+        // 기본 주소를 지웠다면, 남아있는 첫 번째 주소를 기본으로 설정
+        if (wasDefault) {
+            // @OrderColumn(order_index) 이므로 0번이 "첫 번째" 주소
+            UserAddress first = user.getUserAddresses().getFirst();
+            user.setDefaultAddress(first.getAddressId());
+        }
+
+        // 5) 응답
+        return GetUserResponse.from(user);
     }
 
     // 검증 + 블랙리스트 등록 + RT 삭제까지 한 번에

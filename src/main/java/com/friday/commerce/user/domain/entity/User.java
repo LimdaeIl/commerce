@@ -112,7 +112,9 @@ public class User {
         this.deletedBy = null;
 
         if (userAddresses != null) {
-            addAddress(userAddresses);
+            userAddresses.setDefault(true);
+            this.userAddresses.add(userAddresses);
+            userAddresses.setUser(this);
         }
     }
 
@@ -134,12 +136,17 @@ public class User {
                 .build();
     }
 
-    public void addAddress(UserAddress address) {
+    public void addAddress(Long userId, UserAddress address) {
         if (address == null) {
             return;
         }
+        // 첫 주소라면 기본으로
+        if (this.userAddresses.isEmpty()) {
+            address.setDefault(true);
+        }
         this.userAddresses.add(address);
         address.setUser(this);
+        updated(userId);
     }
 
     public void removeAddress(UserAddress address) {

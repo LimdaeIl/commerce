@@ -69,7 +69,7 @@ public class UserAddress {
         this.addressLine2 = addressLine2;
         this.city = city;
         this.state = state;
-        this.isDefault = (isDefault != null) ? isDefault : Boolean.TRUE;
+        this.isDefault = (isDefault != null) ? isDefault : Boolean.FALSE;
     }
 
     public static UserAddress create(

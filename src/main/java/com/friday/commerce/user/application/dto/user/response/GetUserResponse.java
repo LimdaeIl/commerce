@@ -17,6 +17,7 @@ public record GetUserResponse(
         Agreement agreement,
         List<Address> addresses
 ) {
+
     public static GetUserResponse from(User u) {
         return new GetUserResponse(
                 u.getUserId(),
@@ -33,6 +34,7 @@ public record GetUserResponse(
             Boolean privacy,
             Boolean marketing
     ) {
+
         static Agreement from(UserAgreement ua) {
             return new Agreement(ua.isTermsOfService(), ua.isPrivacy(), ua.isMarketing());
         }
@@ -40,20 +42,25 @@ public record GetUserResponse(
 
     @JsonAutoDetect(fieldVisibility = ANY) // 필드 기반 직렬화 허용
     private record Address(
+            Long addressId,
             String zipCode,
             String addressLine1,
             String addressLine2,
             String city,
-            String state
+            String state,
+            Boolean isDefault
     ) {
+
         static List<Address> from(List<UserAddress> list) {
             return list.stream()
                     .map(a -> new Address(
+                            a.getAddressId(),
                             a.getZipCode(),
                             a.getAddressLine1(),
                             a.getAddressLine2(),
                             a.getCity(),
-                            a.getState()))
+                            a.getState(),
+                            a.getIsDefault()))
                     .toList();
         }
     }

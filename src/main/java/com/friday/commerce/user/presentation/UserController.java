@@ -5,6 +5,7 @@ import com.friday.commerce.core.security.annotation.RequireRole;
 import com.friday.commerce.core.security.model.CurrentUserInfo;
 import com.friday.commerce.core.security.model.UserRole;
 import com.friday.commerce.user.application.dto.auth.response.SendCodeEmailResponse;
+import com.friday.commerce.user.application.dto.user.request.RegisterAddressRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdateEmailConfirmRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdateEmailRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdatePasswordRequest;
@@ -14,8 +15,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -68,6 +71,7 @@ public class UserController {
                 .body(response);
     }
 
+    @RequireRole({UserRole.USER, UserRole.SELLER, UserRole.ADMIN})
     @PostMapping("/email/confirm")
     public ResponseEntity<Void> confirmEmailChange(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
@@ -77,5 +81,44 @@ public class UserController {
         userUseCase.confirmUpdateEmail(authHeader, info, request);
         return ResponseEntity.noContent().build();
     }
+
+    @RequireRole({UserRole.USER, UserRole.SELLER, UserRole.ADMIN})
+    @PostMapping("/addresses")
+    public ResponseEntity<GetUserResponse> registerAddress(
+            @CurrentUser CurrentUserInfo info,
+            @Valid @RequestBody RegisterAddressRequest request
+    ) {
+        GetUserResponse response = userUseCase.registerAddress(info, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @RequireRole({UserRole.USER, UserRole.SELLER, UserRole.ADMIN})
+    @PostMapping("/addresses/{addressId}/default")
+    public ResponseEntity<GetUserResponse> updateDefaultAddress(
+            @PathVariable Long addressId,
+            @CurrentUser CurrentUserInfo info) {
+        GetUserResponse response = userUseCase.updateDefaultAddress(info, addressId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @RequireRole({UserRole.USER, UserRole.SELLER, UserRole.ADMIN})
+    @DeleteMapping("/addresses/{addressId}")
+    public ResponseEntity<GetUserResponse> deleteAddress(
+            @PathVariable Long addressId,
+            @CurrentUser CurrentUserInfo info
+    ) {
+        GetUserResponse response = userUseCase.deleteAddress(info, addressId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
 
 }
