@@ -172,7 +172,7 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
         }
         UserRole userRoleOrNull = toUserRoleOrNull(headerVal);
         if (userRoleOrNull == null) {
-            throw new AppException(AppErrorCode.NULL_USER_ROLE);
+            throw new AppException(AppErrorCode.INVALID_HEADER_USER_ROLE);
         }
         return userRoleOrNull;
     }

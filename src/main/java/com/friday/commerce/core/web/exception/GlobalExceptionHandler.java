@@ -1,6 +1,7 @@
 package com.friday.commerce.core.web.exception;
 
 import com.friday.commerce.core.web.response.ApiErrorResponse;
+import com.friday.commerce.core.web.response.ApiErrorResponse.FieldError;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
@@ -20,7 +21,7 @@ public class GlobalExceptionHandler {
     // 도메인 단건 예외
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ApiErrorResponse> handleApp(AppException ex) {
-        var code = ex.getErrorCode();
+        ErrorCode code = ex.getErrorCode();
         return ResponseEntity.status(code.getStatus())
                 .body(ApiErrorResponse.of(code.getStatus(), code.getMessage()));
     }
@@ -40,8 +41,8 @@ public class GlobalExceptionHandler {
     // Validator 직접 사용 시 (여러 필드)
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiErrorResponse> handleConstraint(ConstraintViolationException ex) {
-        var errors = ex.getConstraintViolations().stream()
-                .map(v -> ApiErrorResponse.FieldError.of(v.getPropertyPath().toString(),
+        List<FieldError> errors = ex.getConstraintViolations().stream()
+                .map(v -> FieldError.of(v.getPropertyPath().toString(),
                         v.getMessage()))
                 .toList();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -90,10 +91,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(org.springframework.web.HttpMediaTypeNotAcceptableException.class)
     public ResponseEntity<ApiErrorResponse> handleNotAcceptable(org.springframework.web.HttpMediaTypeNotAcceptableException ex) {
         log.warn("콘텐츠 협상 실패(406): {}", rootCauseMessage(ex));
-        return ResponseEntity.status(AppErrorCode.NOT_ACCEPTABLE.getStatus())
+        return ResponseEntity.status(AppErrorCode.MEDIA_TYPE_NOT_ACCEPTABLE.getStatus())
                 .body(ApiErrorResponse.of(
-                        AppErrorCode.NOT_ACCEPTABLE.getStatus(),
-                        AppErrorCode.NOT_ACCEPTABLE.getMessage()
+                        AppErrorCode.MEDIA_TYPE_NOT_ACCEPTABLE.getStatus(),
+                        AppErrorCode.MEDIA_TYPE_NOT_ACCEPTABLE.getMessage()
                 ));
     }
 
