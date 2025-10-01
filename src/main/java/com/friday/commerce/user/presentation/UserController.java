@@ -6,6 +6,7 @@ import com.friday.commerce.core.security.model.CurrentUserInfo;
 import com.friday.commerce.core.security.model.UserRole;
 import com.friday.commerce.user.application.dto.auth.response.SendCodeEmailResponse;
 import com.friday.commerce.user.application.dto.user.request.RegisterAddressRequest;
+import com.friday.commerce.user.application.dto.user.request.SoftDeleteUserRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdateEmailConfirmRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdateEmailRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdatePasswordRequest;
@@ -63,7 +64,7 @@ public class UserController {
     public ResponseEntity<SendCodeEmailResponse> updateEmail(
             @CurrentUser CurrentUserInfo info,
             @RequestBody @Valid UpdateEmailRequest request
-            ) {
+    ) {
         SendCodeEmailResponse response = userUseCase.updateEmail(info, request);
 
         return ResponseEntity
@@ -120,5 +121,17 @@ public class UserController {
                 .body(response);
     }
 
+    @RequireRole({UserRole.USER, UserRole.SELLER, UserRole.ADMIN})
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> softDeleteUser(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestBody SoftDeleteUserRequest request,
+            @CurrentUser CurrentUserInfo info
+    ) {
+        userUseCase.softDeleteUser(info, authHeader, request);
 
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
 }

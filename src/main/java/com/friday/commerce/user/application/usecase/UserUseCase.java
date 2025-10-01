@@ -3,6 +3,7 @@ package com.friday.commerce.user.application.usecase;
 import com.friday.commerce.core.security.model.CurrentUserInfo;
 import com.friday.commerce.user.application.dto.auth.response.SendCodeEmailResponse;
 import com.friday.commerce.user.application.dto.user.request.RegisterAddressRequest;
+import com.friday.commerce.user.application.dto.user.request.SoftDeleteUserRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdateEmailConfirmRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdateEmailRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdatePasswordRequest;
@@ -24,4 +25,6 @@ public interface UserUseCase {
     GetUserResponse updateDefaultAddress(CurrentUserInfo info, Long addressId);
 
     GetUserResponse deleteAddress(CurrentUserInfo info, Long addressId);
+
+    void softDeleteUser(CurrentUserInfo info, String authHeader, SoftDeleteUserRequest request);
 }

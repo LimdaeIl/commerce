@@ -206,4 +206,9 @@ public class User {
         this.updatedAt = LocalDateTime.now();
         this.updatedBy = userId;
     }
+
+    public void softDeleted(Long userId) {
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = userId;
+    }
 }
