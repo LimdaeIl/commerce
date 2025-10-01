@@ -7,6 +7,7 @@ import com.friday.commerce.core.security.annotation.CurrentUser;
 import com.friday.commerce.core.security.annotation.RequireRole;
 import com.friday.commerce.core.security.model.CurrentUserInfo;
 import com.friday.commerce.core.security.model.UserRole;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class CategoryController {
     @PostMapping
     public ResponseEntity<CreateCategoryResponse> createCategory(
             @CurrentUser CurrentUserInfo info,
-            @RequestBody CreateCategoryRequest request
+            @RequestBody @Valid CreateCategoryRequest request
     ) {
         CreateCategoryResponse response = categoryUseCase.createCategory(info, request);
 

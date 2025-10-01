@@ -12,6 +12,4 @@ public interface CategoryRepository {
     Optional<Category> findByParentAndName(Category last, String name);
 
     Category save(Category newCat);
-
-    Boolean existsByName(String name);
 }
