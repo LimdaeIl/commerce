@@ -3,8 +3,6 @@ package com.friday.commerce.catalog.domain.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -21,7 +19,6 @@ public class ProductCategory {
 
     @Id
     @Column(name = "product_category_id", nullable = false, updatable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productCategoryId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,12 +30,18 @@ public class ProductCategory {
     private Category category;
 
 
-    private ProductCategory(Product product, Category category) {
+    private ProductCategory(Long productCategoryId, Product product, Category category) {
+        this.productCategoryId = productCategoryId;
         this.product = product;
         this.category = category;
     }
 
-    public static ProductCategory link(Product product, Category category) {
-        return new ProductCategory(product, category);
+    public static ProductCategory link(Long productCategoryId, Product product, Category category) {
+        return new ProductCategory(productCategoryId, product, category);
     }
+
+    void assignTo(Product product) {
+        this.product = product;
+    }
+
 }

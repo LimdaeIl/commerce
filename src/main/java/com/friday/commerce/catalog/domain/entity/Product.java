@@ -134,19 +134,21 @@ public class Product {
         }
     }
 
-    private void addProductCategory(Category category) {
-        this.productCategories.add(ProductCategory.link(this, category));
+    public void addProductCategory(ProductCategory link) {
+        link.assignTo(this);
+        this.productCategories.add(link);
     }
 
-    public void replaceCategories(List<Category> categories) {
+    public void replaceCategories(List<ProductCategory> newLinks) {
         this.productCategories.clear();
 
-        if (categories == null) {
+        if (newLinks == null) {
             return;
         }
 
-        for (Category category : categories) {
-            this.productCategories.add(ProductCategory.link(this, category));
+        for (ProductCategory pc : newLinks) {
+            pc.assignTo(this); 
+            this.productCategories.add(pc);
         }
     }
 
