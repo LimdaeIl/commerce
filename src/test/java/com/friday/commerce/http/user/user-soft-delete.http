@@ -42,7 +42,7 @@ Accept: application/json
 %}
 
 ### 회원 소프트 삭제
-DELETE http://localhost:10000/api/v1/users/delete
+DELETE http://localhost:10000/api/v1/users/me
 Content-Type: application/json
 Authorization: Bearer {{at}}
 
