@@ -22,7 +22,6 @@ public class ProductImage {
 
     @Id
     @Column(name = "product_image_id", nullable = false, updatable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productImageId;
 
     @ManyToOne(fetch = FetchType.LAZY)
