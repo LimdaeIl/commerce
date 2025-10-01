@@ -46,6 +46,8 @@ public enum ProductErrorCode implements ErrorCode {
     IMAGE_ASSIGN_FORBIDDEN(HttpStatus.FORBIDDEN, "이미지: 해당 상품에 이미지를 추가할 수 없습니다."),
 
     // ===== 카테고리 & 연결 =====
+    CATEGORY_NAME_INVALID(HttpStatus.BAD_REQUEST, "카테고리: 카테고리 이름이 부적절합니다."),
+    CATEGORY_NAME_DUPLICATED(HttpStatus.CONFLICT, "카테고리: 이미 존재하는 카테고리입니다."),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리: 카테고리를 찾을 수 없습니다."),
     CATEGORY_DEPTH_EXCEEDED(HttpStatus.BAD_REQUEST, "카테고리: 허용된 최대 깊이를 초과했습니다."),
     CATEGORY_PATH_INVALID(HttpStatus.BAD_REQUEST, "카테고리: 경로가 올바르지 않습니다."),

@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -33,7 +34,7 @@ public class Category {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private Category parent;     // Adjacency List: 부모 카테고리
+    private Category parent;
 
     // Adjacency List: 자식 카테고리 목록
     @OneToMany(mappedBy = "parent")
@@ -46,36 +47,71 @@ public class Category {
     private String path;
 
     @Column(nullable = false)
-    private int depth; // 편의성을 위한 Depth
+    private int depth;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "created_by", nullable = false, updatable = false)
+    private Long createdBy;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "updated_by")
+    private Long updatedBy;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "deleted_by")
+    private Long deletedBy;
 
     @Builder(access = AccessLevel.PRIVATE)
     private Category(
             Long categoryId,
             String name,
             Category parent,
-            String path,
-            int depth
+            Long createdBy
     ) {
         this.categoryId = categoryId;
         this.name = name;
         this.parent = parent;
-        this.path = path;
-        this.depth = depth;
+
+        if (parent == null) { // null: Root(1) 인 경우
+            this.depth = 1;
+            this.path = categoryId + "/";
+        } else {
+            this.depth = parent.getDepth() + 1;
+            this.path = parent.getPath() + categoryId + "/";
+        }
+        this.createdAt = LocalDateTime.now();
+        this.createdBy = createdBy;
+        this.updatedAt = null;
+        this.updatedBy = null;
+        this.deletedAt = null;
+        this.deletedBy = null;
     }
 
-    public static Category create(
-            Long categoryId,
-            String name,
-            Category parent,
-            String path,
-            int depth
-    ) {
+    public static Category createRoot(Long categoryId, String name, Long createdBy) {
+        return Category.builder()
+                .categoryId(categoryId)
+                .name(name)
+                .parent(null)
+                .createdBy(createdBy)
+                .build();
+    }
+
+    public static Category createChild(Long categoryId, String name, Category parent,  Long createdBy) {
+        if (parent == null) {
+            throw new ProductException(ProductErrorCode.CATEGORY_PARENT_NULL);
+        }
+
         return Category.builder()
                 .categoryId(categoryId)
                 .name(name)
                 .parent(parent)
-                .path(path)
-                .depth(depth)
+                .createdBy(createdBy)
                 .build();
     }
 
@@ -90,7 +126,7 @@ public class Category {
     }
 
     public void updatePathAndDepth(Category parent) {
-        if (parent == null) { // null: 최상위 카테고리
+        if (parent == null) { // null: Root(1) 인 경우
             this.depth = 1;
             this.path = this.categoryId + "/";
         } else {
