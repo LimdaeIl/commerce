@@ -17,6 +17,7 @@ import com.friday.commerce.user.application.dto.auth.response.SignInResponse;
 import com.friday.commerce.user.application.dto.auth.response.SignUpResponse;
 import com.friday.commerce.user.application.dto.auth.response.VerifyCodeEmailResponse;
 import com.friday.commerce.user.application.dto.user.request.RegisterAddressRequest;
+import com.friday.commerce.user.application.dto.user.request.SoftDeleteUserRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdateEmailConfirmRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdateEmailRequest;
 import com.friday.commerce.user.application.dto.user.request.UpdatePasswordRequest;
@@ -242,8 +243,14 @@ class UserService implements AuthUseCase, UserUseCase {
     @Transactional
     @Override
     public SignInResponse signIn(SignInRequest request) {
-        // 1) ID, PW 확인
+        // softDelete 여부 확인
         User user = verifyUserByEmail(request.email());
+
+        if (user.getDeletedAt() != null) {
+            throw new UserException(UserErrorCode.USER_DELETED);
+        }
+
+        // 1) ID, PW 확인
         verifyUserPassword(request.password(), user.getPassword());
 
         // 2) 토큰 발급
@@ -506,6 +513,25 @@ class UserService implements AuthUseCase, UserUseCase {
 
         // 5) 응답
         return GetUserResponse.from(user);
+    }
+
+    @Transactional
+    @Override
+    public void softDeleteUser(CurrentUserInfo info, String authHeader,
+            SoftDeleteUserRequest request) {
+        User user = findUserById(info.userId());
+
+        // RT 확인
+        if (!StringUtils.hasText(request.rt())) {
+            throw new UserException(UserErrorCode.RT_NOT_FOUND);
+        }
+
+        // 계정 소프트삭제
+        user.softDeleted(info.userId());
+        user.updated(info.userId());
+
+        // 강제 로그아웃: 이전 AT, RT 무효화
+        invalidateSession(authHeader, request.rt());
     }
 
     // 검증 + 블랙리스트 등록 + RT 삭제까지 한 번에
