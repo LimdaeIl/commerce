@@ -243,15 +243,14 @@ class UserService implements AuthUseCase, UserUseCase {
     @Transactional
     @Override
     public SignInResponse signIn(SignInRequest request) {
-        // softDelete 여부 확인
+        // 1) ID, PW 확인
         User user = verifyUserByEmail(request.email());
+        verifyUserPassword(request.password(), user.getPassword());
 
+        // + softDelete 여부 확인
         if (user.getDeletedAt() != null) {
             throw new UserException(UserErrorCode.USER_DELETED);
         }
-
-        // 1) ID, PW 확인
-        verifyUserPassword(request.password(), user.getPassword());
 
         // 2) 토큰 발급
         String at = tokenProvider.issueAt(user.getUserId(), user.toCoreRole());
