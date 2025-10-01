@@ -154,3 +154,9 @@ security:
         - /users/**
       include-path-patterns:
         /api/**
+
+commerce:
+  catalog:
+    category:
+      max-depth: 5   # 기본값. 추후 4, 7 등 자유롭게 변경 가능
+      hard-limit: 7 # 방어선(요청 오버라이드의 상한)
