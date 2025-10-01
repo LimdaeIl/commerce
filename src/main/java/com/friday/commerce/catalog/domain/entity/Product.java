@@ -106,8 +106,8 @@ public class Product {
     }
 
     public void replaceSkus(List<ProductSku> skus) {
+        this.productSkus.forEach(sku -> sku.assignTo(null));
         this.productSkus.clear();
-
         if (skus == null) {
             return;
         }
@@ -123,6 +123,7 @@ public class Product {
     }
 
     public void replaceImages(List<ProductImage> images) {
+        this.images.forEach(image -> image.assignTo(null));
         this.images.clear();
 
         if (images == null) {
@@ -140,6 +141,7 @@ public class Product {
     }
 
     public void replaceCategories(List<ProductCategory> newLinks) {
+        this.productCategories.forEach(link -> link.assignTo(null));
         this.productCategories.clear();
 
         if (newLinks == null) {
@@ -147,8 +149,7 @@ public class Product {
         }
 
         for (ProductCategory pc : newLinks) {
-            pc.assignTo(this); 
-            this.productCategories.add(pc);
+            pc.assignTo(this);
         }
     }
 

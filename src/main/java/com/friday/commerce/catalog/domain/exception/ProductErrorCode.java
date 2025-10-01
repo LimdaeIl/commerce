@@ -50,8 +50,10 @@ public enum ProductErrorCode implements ErrorCode {
     CATEGORY_DEPTH_EXCEEDED(HttpStatus.BAD_REQUEST, "카테고리: 허용된 최대 깊이를 초과했습니다."),
     CATEGORY_PATH_INVALID(HttpStatus.BAD_REQUEST, "카테고리: 경로가 올바르지 않습니다."),
     CATEGORY_CYCLE_DETECTED(HttpStatus.BAD_REQUEST, "카테고리: 순환 참조가 감지되었습니다."),
+    CATEGORY_PARENT_NULL(HttpStatus.BAD_REQUEST, "카테고리: 부모 카테고리가 NULL 입니니다."),
     PRODUCT_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리 연결: 상품-카테고리 연결을 찾을 수 없습니다."),
     PRODUCT_CATEGORY_DUPLICATED(HttpStatus.CONFLICT, "카테고리 연결: 이미 연결된 카테고리입니다."),
+
 
     // ===== 내용 정제/포맷 =====
     CONTENT_HTML_SANITIZE_FAILED(HttpStatus.BAD_REQUEST, "콘텐츠: HTML 정제 과정에서 오류가 발생했습니다."),

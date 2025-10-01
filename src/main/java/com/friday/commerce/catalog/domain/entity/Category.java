@@ -1,6 +1,8 @@
 package com.friday.commerce.catalog.domain.entity;
 
 
+import com.friday.commerce.catalog.domain.exception.ProductErrorCode;
+import com.friday.commerce.catalog.domain.exception.ProductException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -79,8 +81,12 @@ public class Category {
 
 
     public void addParent(Category parent) {
+        if (parent == null) {
+            throw new ProductException(ProductErrorCode.CATEGORY_PARENT_NULL);
+        }
         this.parent = parent;
         parent.getChildren().add(this);
+        updatePathAndDepth(parent);
     }
 
     public void updatePathAndDepth(Category parent) {

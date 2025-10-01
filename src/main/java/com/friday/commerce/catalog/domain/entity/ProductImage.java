@@ -3,8 +3,6 @@ package com.friday.commerce.catalog.domain.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -67,7 +65,7 @@ public class ProductImage {
                 .build();
     }
 
-     void assignTo(Product product) {
+    public void assignTo(Product product) {
         this.product = product;
     }
 

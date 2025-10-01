@@ -26,10 +26,10 @@ public class ProductSku {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(name = "price")
+    @Column(name = "price", nullable = false)
     private Long price;
 
-    @Column(name = "stock")
+    @Column(name = "stock", nullable = false)
     private Long stock;
 
     @Builder(access = AccessLevel.PRIVATE)
