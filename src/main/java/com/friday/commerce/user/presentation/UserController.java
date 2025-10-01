@@ -122,10 +122,10 @@ public class UserController {
     }
 
     @RequireRole({UserRole.USER, UserRole.SELLER, UserRole.ADMIN})
-    @DeleteMapping("/delete")
+    @DeleteMapping("/me")
     public ResponseEntity<Void> softDeleteUser(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @RequestBody SoftDeleteUserRequest request,
+            @RequestBody @Valid SoftDeleteUserRequest request,
             @CurrentUser CurrentUserInfo info
     ) {
         userUseCase.softDeleteUser(info, authHeader, request);
