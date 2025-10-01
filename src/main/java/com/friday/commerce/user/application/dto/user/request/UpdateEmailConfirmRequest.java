@@ -16,6 +16,6 @@ public record UpdateEmailConfirmRequest(
         @Max(999999)
         Integer code,
 
-        @NotBlank
+        @NotBlank(message = "리프레시 토큰: 토큰은 필수입니다.")
         String rt
 ) {}

@@ -248,7 +248,7 @@ class UserService implements AuthUseCase, UserUseCase {
         verifyUserPassword(request.password(), user.getPassword());
 
         // + softDelete 여부 확인
-        if (user.getDeletedAt() != null) {
+        if (user.getDeletedAt() != null && user.getDeletedBy() != null) {
             throw new UserException(UserErrorCode.USER_DELETED);
         }
 
