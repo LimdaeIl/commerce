@@ -1,5 +1,7 @@
 package com.friday.commerce.core.utils.snowflake;
 
+import com.friday.commerce.core.web.exception.AppErrorCode;
+import com.friday.commerce.core.web.exception.AppException;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +21,8 @@ class SnowflakeConfig {
         } else if (props.isAutoDetectNodeId()) {
             node = Snowflake.inferNodeId();
         } else {
-            throw new IllegalStateException(
-                    "snowflake.node-categoryId must be set when auto-detect-node-categoryId=false");
+            throw new AppException(AppErrorCode.SNOWFLAKE_NODE_ID_REQUIRED);
+
         }
 
         return new Snowflake(
