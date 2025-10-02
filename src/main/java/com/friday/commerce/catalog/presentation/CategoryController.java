@@ -2,6 +2,7 @@ package com.friday.commerce.catalog.presentation;
 
 import com.friday.commerce.catalog.application.dto.category.request.CreateCategoryRequest;
 import com.friday.commerce.catalog.application.dto.category.response.CreateCategoryResponse;
+import com.friday.commerce.catalog.application.dto.category.response.GetAllCategoriesResponse;
 import com.friday.commerce.catalog.application.usecase.CategoryUseCase;
 import com.friday.commerce.core.security.annotation.CurrentUser;
 import com.friday.commerce.core.security.annotation.RequireRole;
@@ -11,9 +12,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -34,5 +37,19 @@ public class CategoryController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<GetAllCategoriesResponse> getAllCategories(
+            @RequestParam(defaultValue = "tree") String format,
+            @RequestParam(required = false) Integer maxDepth
+
+    ) {
+        GetAllCategoriesResponse response = categoryUseCase.getAllCategories(format, maxDepth);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+
     }
 }

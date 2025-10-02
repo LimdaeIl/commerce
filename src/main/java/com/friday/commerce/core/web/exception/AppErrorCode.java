@@ -70,7 +70,12 @@ public enum AppErrorCode implements ErrorCode {
 
     // Idempotency
     IDEMPOTENCY_KEY_REQUIRED(HttpStatus.BAD_REQUEST, "공통: Idempotency-Key 헤더가 필요합니다."),
-    IDEMPOTENCY_REPLAY(HttpStatus.CONFLICT, "공통: 중복 요청이 감지되었습니다.");
+    IDEMPOTENCY_REPLAY(HttpStatus.CONFLICT, "공통: 중복 요청이 감지되었습니다."),
+
+    // Snowflake
+    SNOWFLAKE_NODE_ID_REQUIRED(HttpStatus.INTERNAL_SERVER_ERROR,
+            "식별자: Snowflake node-id가 설정되지 않았습니다. auto-detect-node-id=false인 경우 필수입니다.");
+
 
     private final HttpStatus status;
     private final String message;

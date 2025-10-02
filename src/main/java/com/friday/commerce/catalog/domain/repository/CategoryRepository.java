@@ -1,6 +1,7 @@
 package com.friday.commerce.catalog.domain.repository;
 
 import com.friday.commerce.catalog.domain.entity.Category;
+import java.util.List;
 import java.util.Optional;
 
 public interface CategoryRepository {
@@ -12,4 +13,6 @@ public interface CategoryRepository {
     Optional<Category> findByParentAndName(Category last, String name);
 
     Category save(Category newCat);
+
+    List<Category> findAllByDeletedAtIsNullAndDeletedByIsNullOrderByDepthAscNameAsc();
 }
