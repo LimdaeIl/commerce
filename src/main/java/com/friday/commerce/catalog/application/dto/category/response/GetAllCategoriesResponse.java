@@ -111,19 +111,6 @@ public record GetAllCategoriesResponse(
 
     /* ===================== v2 대비: 플랫 로우 인터페이스 버전 ===================== */
 
-    public interface CategoryFlatRow {
-
-        Long categoryId();
-
-        String name();
-
-        Long parentId();
-
-        String path();
-
-        Integer depth();
-    }
-
     public static GetAllCategoriesResponse asTree(List<CategoryFlatRow> rows, Integer maxDepth) {
         int total = rows.size();
         Map<Long, Node> map = new HashMap<>(Math.max(16, total * 2));

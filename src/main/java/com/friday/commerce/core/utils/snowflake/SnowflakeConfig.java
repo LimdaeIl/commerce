@@ -20,7 +20,7 @@ class SnowflakeConfig {
             node = Snowflake.inferNodeId();
         } else {
             throw new IllegalStateException(
-                    "snowflake.node-id must be set when auto-detect-node-id=false");
+                    "snowflake.node-categoryId must be set when auto-detect-node-categoryId=false");
         }
 
         return new Snowflake(
