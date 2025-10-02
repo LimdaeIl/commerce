@@ -4,6 +4,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.friday.commerce.catalog.application.util.CategoryPathUtil;
 import com.friday.commerce.catalog.domain.entity.Category;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,19 +52,7 @@ public record CreateCategoryResponse(
         );
     }
 
-    // "10/15/23/" → 15 (루트면 null)
     private static Long parentIdFromPath(String path) {
-        if (path == null || path.isBlank()) {
-            return null;
-        }
-        String p = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
-        int last = p.lastIndexOf('/');
-        if (last < 0) {
-            return null; // "10" → 루트
-        }
-        String parentPart = p.substring(0, last); // "10/15"
-        int last2 = parentPart.lastIndexOf('/');
-        String parentIdStr = (last2 < 0) ? parentPart : parentPart.substring(last2 + 1);
-        return parentIdStr.isBlank() ? null : Long.parseLong(parentIdStr);
+        return CategoryPathUtil.extractParentId(path);
     }
 }

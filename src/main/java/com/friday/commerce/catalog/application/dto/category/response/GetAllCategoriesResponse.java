@@ -4,6 +4,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.friday.commerce.catalog.application.util.CategoryPathUtil;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -43,8 +44,6 @@ public record GetAllCategoriesResponse(
 
     }
 
-    /* ===================== v1: 엔티티 전체 로딩 버전 ===================== */
-
     public static GetAllCategoriesResponse asTreeFromEntities(
             List<com.friday.commerce.catalog.domain.entity.Category> entities,
             Integer maxDepth
@@ -80,7 +79,7 @@ public record GetAllCategoriesResponse(
         }
 
         // 3) 정렬 + (깊이 제한 적용 + childrenCount 채운) 새 트리로 재빌드
-        List<Node> rebuilt = sortAndRebuild(roots, maxDepth);
+        List<Node> rebuilt = sortAndRebuild(roots, normalizeMaxDepth(maxDepth));
         return new GetAllCategoriesResponse(List.copyOf(rebuilt), null, total, "v1");
     }
 
@@ -109,64 +108,22 @@ public record GetAllCategoriesResponse(
         return new GetAllCategoriesResponse(null, List.copyOf(items), total, "v1");
     }
 
-    /* ===================== v2 대비: 플랫 로우 인터페이스 버전 ===================== */
 
-    public static GetAllCategoriesResponse asTree(List<CategoryFlatRow> rows, Integer maxDepth) {
-        int total = rows.size();
-        Map<Long, Node> map = new HashMap<>(Math.max(16, total * 2));
-        for (var r : rows) {
-            map.put(r.categoryId(), new Node(
-                    r.categoryId(), r.name(), r.parentId(), r.path(), r.depth(),
-                    0, new ArrayList<>()
-            ));
-        }
-        List<Node> roots = new ArrayList<>();
-        for (var r : rows) {
-            Node me = map.get(r.categoryId());
-            if (r.parentId() == null) {
-                roots.add(me);
-            } else {
-                Node p = map.get(r.parentId());
-                if (p != null) {
-                    p.children().add(me);
-                } else {
-                    roots.add(me);
-                }
-            }
-        }
-        List<Node> rebuilt = sortAndRebuild(roots, maxDepth);
-        return new GetAllCategoriesResponse(List.copyOf(rebuilt), null, total, "v1");
-    }
-
-    public static GetAllCategoriesResponse asFlat(List<CategoryFlatRow> rows) {
-        int total = rows.size();
-
-        Map<Long, Integer> childCnt = new HashMap<>();
-        for (var r : rows) {
-            if (r.parentId() != null) {
-                childCnt.merge(r.parentId(), 1, Integer::sum);
-            }
-        }
-
-        List<Item> items = new ArrayList<>(total);
-        for (var r : rows) {
-            int childrenCount = childCnt.getOrDefault(r.categoryId(), 0);
-            items.add(new Item(
-                    r.categoryId(), r.name(), r.parentId(), r.path(), r.depth(), childrenCount
-            ));
-        }
-        return new GetAllCategoriesResponse(null, List.copyOf(items), total, "v1");
-    }
-
-    /* ===================== 내부 유틸 ===================== */
-
-    private static List<Node> sortAndRebuild(List<Node> nodes, Integer maxDepth) {
-        // 정렬
+    /**
+     * maxDepth 해석:
+     * - depth는 1-base (루트=1) 입니다.
+     * - maxDepth == null: 깊이 제한 없음(전체)
+     * - maxDepth == 1: 루트만, 자식 모두 비움
+     * - maxDepth == 2: 루트 + 즉시 하위
+     * - maxDepth <= 0: 1로 보정(루트만)
+     */
+    private static List<Node> sortAndRebuild(List<Node> nodes, int maxDepth) {
         nodes.sort(Comparator.comparing(Node::name).thenComparing(Node::categoryId));
 
         List<Node> out = new ArrayList<>(nodes.size());
         for (Node n : nodes) {
-            boolean pruneHere = (maxDepth != null && maxDepth > 0 && n.depth() >= maxDepth);
+            // depth(1-base)가 maxDepth 이상이면 자식 제거
+            boolean pruneHere = n.depth() >= maxDepth;
             List<Node> children = pruneHere ? List.of() : sortAndRebuild(n.children(), maxDepth);
             int childrenCount = children.size();
             out.add(new Node(
@@ -177,23 +134,13 @@ public record GetAllCategoriesResponse(
         return out;
     }
 
-    // "10/15/23/" → 15 (루트면 null)
-    private static Long parentIdFromPath(String path) {
-
-        if (path == null || path.isBlank()) {
-            return null;
-        }
-
-        String p = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
-        int last = p.lastIndexOf('/');
-
-        if (last < 0) {
-            return null; // "10" → 루트
-        }
-
-        String parentPart = p.substring(0, last);
-        int last2 = parentPart.lastIndexOf('/');
-        String parentIdStr = (last2 < 0) ? parentPart : parentPart.substring(last2 + 1);
-        return parentIdStr.isBlank() ? null : Long.parseLong(parentIdStr);
+    private static int normalizeMaxDepth(Integer maxDepth) {
+        if (maxDepth == null) return Integer.MAX_VALUE; // 무제한
+        return Math.max(1, maxDepth);                   // 0, 음수 → 1
     }
+
+    private static Long parentIdFromPath(String path) {
+        return CategoryPathUtil.extractParentId(path);
+    }
+
 }
