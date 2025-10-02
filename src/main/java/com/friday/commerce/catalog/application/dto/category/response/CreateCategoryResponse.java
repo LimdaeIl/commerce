@@ -8,45 +8,62 @@ import com.friday.commerce.catalog.domain.entity.Category;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record CreateCategoryResponse(
-        List<Item> categories,   // 루트 → 리프 순서의 카테고리 체인 (생성 + 재사용 포함)
-        List<Long> createdIds,   // 이번 요청에서 실제 새로 생성된 categoryId 리스트
-        boolean anyCreated,      // 새로 생성된 게 하나라도 있었는지
-        Long createdBy           // 요청자 ID
+        List<Item> categories,           // 루트 → 리프 순서(생성 + 재사용 포함)
+        List<Long> createdCategoryIds,   // 이번 요청에서 새로 생성된 categoryId 목록
+        boolean anyCreated,              // 하나라도 생성되었는지
+        Long createdBy                   // 요청자 ID
 ) {
 
-    @JsonAutoDetect(fieldVisibility = ANY) // private라도 직렬화 가능
+    @JsonAutoDetect(fieldVisibility = ANY)
     private record Item(
             Long categoryId,
             String name,
+            Long parentId,
             String path,
             Integer depth
-    ) { }
+    ) {
 
-    /** 체인 + 생성 ID 집합을 받아 응답 DTO로 변환하는 팩토리 */
+    }
+
     public static CreateCategoryResponse fromEntities(
-            List<Category> chain,   // 루트 → 리프
-            List<Long> createdIds,  // null 가능
-            Long createdBy
+            List<Category> chain,       // 루트 → 리프
+            List<Long> createdIds,      // null 가능
+            Long requesterId
     ) {
         List<Item> items = new ArrayList<>(chain.size());
-        for (Category category : chain) {
+        for (Category c : chain) {
             items.add(new Item(
-                    category.getCategoryId(),
-                    category.getName(),
-                    category.getPath(),
-                    category.getDepth()
+                    c.getCategoryId(),
+                    c.getName(),
+                    parentIdFromPath(c.getPath()),
+                    c.getPath(),
+                    c.getDepth()
             ));
         }
         boolean anyCreated = createdIds != null && !createdIds.isEmpty();
-        // createdIds는 그대로 노출(소비자가 필요 시 per-item created를 자체 계산)
         return new CreateCategoryResponse(
                 List.copyOf(items),
                 createdIds == null ? List.of() : List.copyOf(createdIds),
                 anyCreated,
-                createdBy
+                requesterId
         );
+    }
+
+    // "10/15/23/" → 15 (루트면 null)
+    private static Long parentIdFromPath(String path) {
+        if (path == null || path.isBlank()) {
+            return null;
+        }
+        String p = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
+        int last = p.lastIndexOf('/');
+        if (last < 0) {
+            return null; // "10" → 루트
+        }
+        String parentPart = p.substring(0, last); // "10/15"
+        int last2 = parentPart.lastIndexOf('/');
+        String parentIdStr = (last2 < 0) ? parentPart : parentPart.substring(last2 + 1);
+        return parentIdStr.isBlank() ? null : Long.parseLong(parentIdStr);
     }
 }
