@@ -143,4 +143,9 @@ public class Category {
         this.updatedAt = java.time.LocalDateTime.now();
         this.updatedBy = updatedBy;
     }
+
+    public void softDelete(Long deletedBy) {
+        this.deletedAt = java.time.LocalDateTime.now();
+        this.deletedBy = deletedBy;
+    }
 }

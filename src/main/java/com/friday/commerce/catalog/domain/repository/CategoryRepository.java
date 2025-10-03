@@ -21,4 +21,10 @@ public interface CategoryRepository {
     boolean existsByParentIsNullAndNameAndDeletedAtIsNull(String newName);
 
     boolean existsByParentAndNameAndDeletedAtIsNull(Category parent, String newName);
+
+    long countByParentAndDeletedAtIsNull(Category parent);
+
+    Optional<Category> findByParentIsNullAndNameAndDeletedAtIsNull(String name);
+    Optional<Category> findByParentAndNameAndDeletedAtIsNull(Category parent, String name);
+
 }
