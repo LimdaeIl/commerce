@@ -60,7 +60,6 @@ public enum ProductErrorCode implements ErrorCode {
     // ===== 내용 정제/포맷 =====
     CONTENT_HTML_SANITIZE_FAILED(HttpStatus.BAD_REQUEST, "콘텐츠: HTML 정제 과정에서 오류가 발생했습니다."),
     CONTENT_MARKDOWN_INVALID(HttpStatus.BAD_REQUEST, "콘텐츠: 마크다운 형식이 올바르지 않습니다.");
-
     private final HttpStatus status;
     private final String message;
 }

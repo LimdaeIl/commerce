@@ -15,4 +15,10 @@ public interface CategoryRepository {
     Category save(Category newCat);
 
     List<Category> findAllByDeletedAtIsNullAndDeletedByIsNullOrderByDepthAscNameAsc();
+
+    Optional<Category> findByCategoryIdAndDeletedAtIsNull(Long categoryId);
+
+    boolean existsByParentIsNullAndNameAndDeletedAtIsNull(String newName);
+
+    boolean existsByParentAndNameAndDeletedAtIsNull(Category parent, String newName);
 }

@@ -1,8 +1,10 @@
 package com.friday.commerce.catalog.application.service;
 
 import com.friday.commerce.catalog.application.dto.category.request.CreateCategoryRequest;
+import com.friday.commerce.catalog.application.dto.category.request.UpdateCategoryNameRequest;
 import com.friday.commerce.catalog.application.dto.category.response.CreateCategoryResponse;
 import com.friday.commerce.catalog.application.dto.category.response.GetAllCategoriesResponse;
+import com.friday.commerce.catalog.application.dto.category.response.UpdateCategoryNameResponse;
 import com.friday.commerce.catalog.application.usecase.CategoryUseCase;
 import com.friday.commerce.catalog.domain.entity.Category;
 import com.friday.commerce.catalog.domain.exception.ProductErrorCode;
@@ -14,6 +16,7 @@ import com.friday.commerce.core.utils.snowflake.Snowflake;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,11 @@ public class CategoryService implements CategoryUseCase {
 
     private Category findCategoryById(Long categoryId) {
         return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ProductException(ProductErrorCode.CATEGORY_NOT_FOUND));
+    }
+
+    private Category mustGetActive(Long categoryId) {
+        return categoryRepository.findByCategoryIdAndDeletedAtIsNull(categoryId)
                 .orElseThrow(() -> new ProductException(ProductErrorCode.CATEGORY_NOT_FOUND));
     }
 
@@ -115,5 +123,52 @@ public class CategoryService implements CategoryUseCase {
         }
         // 트리 + childrenCount(=children.size()) 포함, maxDepth 적용 가능
         return GetAllCategoriesResponse.asTreeFromEntities(all, maxDepth);
+    }
+
+    @Transactional
+    @Override
+    public UpdateCategoryNameResponse updateName(
+            Long categoryId,
+            UpdateCategoryNameRequest request,
+            CurrentUserInfo info
+    ) {
+        Category category = mustGetActive(categoryId);
+
+        String newName = request.name();
+        if (newName == null || newName.isBlank()) {
+            throw new ProductException(ProductErrorCode.CATEGORY_NAME_INVALID);
+        }
+
+        // 같은 이름이면 조용히 성공(멱등)
+        if (Objects.equals(category.getName(), newName)) {
+            return toNameResponse(category);
+        }
+
+        // 형제 중복 체크
+        boolean duplicated = (category.getParent() == null)
+                ? categoryRepository.existsByParentIsNullAndNameAndDeletedAtIsNull(newName)
+                : categoryRepository.existsByParentAndNameAndDeletedAtIsNull(category.getParent(),
+                        newName);
+
+        if (duplicated) {
+            throw new ProductException(ProductErrorCode.CATEGORY_NAME_DUPLICATED);
+        }
+
+        // 변경
+        category.rename(newName, info.userId());
+        // dirty checking 으로 flush
+
+        return toNameResponse(category);
+    }
+
+    private UpdateCategoryNameResponse toNameResponse(Category category) {
+        Long parentId = (category.getParent() == null) ? null : category.getParent().getCategoryId();
+        return new UpdateCategoryNameResponse(
+                category.getCategoryId(),
+                category.getName(),
+                parentId,
+                category.getPath(),
+                category.getDepth()
+        );
     }
 }
