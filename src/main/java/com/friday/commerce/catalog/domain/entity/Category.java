@@ -134,4 +134,13 @@ public class Category {
             this.path = parent.getPath() + this.categoryId + "/";
         }
     }
+
+    public void rename(String newName, Long updatedBy) {
+        if (newName == null || newName.isBlank()) {
+            throw new ProductException(ProductErrorCode.CATEGORY_NAME_INVALID);
+        }
+        this.name = newName.trim();
+        this.updatedAt = java.time.LocalDateTime.now();
+        this.updatedBy = updatedBy;
+    }
 }
