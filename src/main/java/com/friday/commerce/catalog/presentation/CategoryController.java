@@ -3,6 +3,7 @@ package com.friday.commerce.catalog.presentation;
 import com.friday.commerce.catalog.application.dto.category.request.CreateCategoryRequest;
 import com.friday.commerce.catalog.application.dto.category.request.UpdateCategoryNameRequest;
 import com.friday.commerce.catalog.application.dto.category.response.CreateCategoryResponse;
+import com.friday.commerce.catalog.application.dto.category.response.DeleteCategoryResponse;
 import com.friday.commerce.catalog.application.dto.category.response.GetAllCategoriesResponse;
 import com.friday.commerce.catalog.application.dto.category.response.UpdateCategoryNameResponse;
 import com.friday.commerce.catalog.application.usecase.CategoryUseCase;
@@ -14,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,6 +61,7 @@ public class CategoryController {
 
 
     // 카테고리명 수정
+    @RequireRole({UserRole.ADMIN, UserRole.SELLER})
     @PatchMapping("/{categoryId}/name")
     public ResponseEntity<UpdateCategoryNameResponse> updateCategoryName(
             @PathVariable Long categoryId,
@@ -67,6 +70,20 @@ public class CategoryController {
     ) {
         UpdateCategoryNameResponse response = categoryUseCase.updateName(categoryId, request, info);
         return ResponseEntity.status(HttpStatus.OK)
+                .body(response);
+    }
+
+    // 카테고리 삭제
+    @RequireRole({UserRole.ADMIN, UserRole.SELLER})
+    @DeleteMapping("/{categoryId}")
+    public ResponseEntity<DeleteCategoryResponse> deleteCategory(
+            @PathVariable Long categoryId,
+            @CurrentUser CurrentUserInfo info
+    ) {
+        DeleteCategoryResponse response = categoryUseCase.deleteCategory(categoryId, info);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
                 .body(response);
     }
 }

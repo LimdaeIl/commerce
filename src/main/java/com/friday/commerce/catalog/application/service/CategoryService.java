@@ -3,6 +3,7 @@ package com.friday.commerce.catalog.application.service;
 import com.friday.commerce.catalog.application.dto.category.request.CreateCategoryRequest;
 import com.friday.commerce.catalog.application.dto.category.request.UpdateCategoryNameRequest;
 import com.friday.commerce.catalog.application.dto.category.response.CreateCategoryResponse;
+import com.friday.commerce.catalog.application.dto.category.response.DeleteCategoryResponse;
 import com.friday.commerce.catalog.application.dto.category.response.GetAllCategoriesResponse;
 import com.friday.commerce.catalog.application.dto.category.response.UpdateCategoryNameResponse;
 import com.friday.commerce.catalog.application.usecase.CategoryUseCase;
@@ -67,7 +68,7 @@ public class CategoryService implements CategoryUseCase {
         int startingDepth = 0;
 
         if (request.startParentId() != null) {
-            currentParent = findCategoryById(request.startParentId());
+            currentParent = mustGetActive(request.startParentId());
             startingDepth = currentParent.getDepth();
         }
 
@@ -83,8 +84,8 @@ public class CategoryService implements CategoryUseCase {
         for (String name : tokens) {
             // 1) 존재 여부 확인
             Optional<Category> existing = (last == null)
-                    ? categoryRepository.findByParentIsNullAndName(name)
-                    : categoryRepository.findByParentAndName(last, name);
+                    ? categoryRepository.findByParentIsNullAndNameAndDeletedAtIsNull(name)
+                    : categoryRepository.findByParentAndNameAndDeletedAtIsNull(last, name);
 
             if (existing.isPresent()) {
                 last = existing.get();
@@ -159,6 +160,26 @@ public class CategoryService implements CategoryUseCase {
         // dirty checking 으로 flush
 
         return toNameResponse(category);
+    }
+
+    @Transactional
+    @Override
+    public DeleteCategoryResponse deleteCategory(Long categoryId, CurrentUserInfo info) {
+        // 1) 활성 카테고리만 대상 (이미 삭제된 것은 404로 본다)
+        Category category = mustGetActive(categoryId);
+
+        // 2) 활성 자식 존재하면 삭제 불가
+        long childCount = categoryRepository.countByParentAndDeletedAtIsNull(category);
+        if (childCount > 0) {
+            throw new ProductException(ProductErrorCode.CATEGORY_HAS_CHILDREN);
+        }
+
+        // 3) 소프트 삭제
+        category.softDelete(info.userId());
+        // JPA dirty checking 으로 반영됨
+
+        // 4) 응답: 표준 필드 그대로
+        return DeleteCategoryResponse.of(category);
     }
 
     private UpdateCategoryNameResponse toNameResponse(Category category) {
