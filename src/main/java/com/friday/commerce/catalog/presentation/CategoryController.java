@@ -61,6 +61,7 @@ public class CategoryController {
 
 
     // 카테고리명 수정
+    @RequireRole({UserRole.ADMIN, UserRole.SELLER})
     @PatchMapping("/{categoryId}/name")
     public ResponseEntity<UpdateCategoryNameResponse> updateCategoryName(
             @PathVariable Long categoryId,
@@ -73,6 +74,7 @@ public class CategoryController {
     }
 
     // 카테고리 삭제
+    @RequireRole({UserRole.ADMIN, UserRole.SELLER})
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<DeleteCategoryResponse> deleteCategory(
             @PathVariable Long categoryId,
