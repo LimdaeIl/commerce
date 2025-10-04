@@ -71,4 +71,16 @@ public class ProductSku {
         }
         this.stock += quantity;
     }
+
+    public void decrement(long quantity) {
+        if (quantity <= 0) {
+            throw new ProductException(ProductErrorCode.SKU_INVALID_QUANTITY);
+        }
+
+        if (quantity > stock) {
+            throw new ProductException(ProductErrorCode.SKU_STOCK_INSUFFICIENT);
+        }
+
+        this.stock -= quantity;
+    }
 }

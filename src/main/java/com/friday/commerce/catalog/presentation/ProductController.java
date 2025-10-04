@@ -1,6 +1,7 @@
 package com.friday.commerce.catalog.presentation;
 
 import com.friday.commerce.catalog.application.dto.product.request.CreateProductRequest;
+import com.friday.commerce.catalog.application.dto.product.request.DecreaseStockRequest;
 import com.friday.commerce.catalog.application.dto.product.request.IncreaseStockRequest;
 import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.catalog.application.dto.product.response.GetAllProductsResponse;
@@ -87,6 +88,19 @@ public class ProductController {
     }
 
     // 재고 감소
+    @RequireRole({UserRole.ADMIN, UserRole.SELLER})
+    @PatchMapping("/{productId}/{productSkuId}/decrease")
+    public ResponseEntity<GetProductResponse> decreaseStock(
+            @PathVariable Long productId,
+            @PathVariable Long productSkuId,
+            @RequestBody @Valid DecreaseStockRequest request
+    ) {
+        GetProductResponse response = productUseCase.decreaseStock(productId, productSkuId, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
 
     // 상품 삭제
 

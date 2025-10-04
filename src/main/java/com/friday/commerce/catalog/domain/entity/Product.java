@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -183,5 +184,10 @@ public class Product {
                 .filter(s -> s.getProductSkuId().equals(productSkuId))
                 .findFirst()
                 .orElseThrow(() -> new ProductException(ProductErrorCode.SKU_NOT_FOUND));
+    }
+
+    public void decreaseStock(Long productSkuId, long quantity) {
+        ProductSku sku = findSkuOrThrow(productSkuId);
+        sku.decrement(quantity);
     }
 }
