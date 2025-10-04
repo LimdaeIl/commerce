@@ -172,4 +172,23 @@ public class Product {
         this.updatedAt = LocalDateTime.now();
         this.updatedBy = userId;
     }
+
+    public void increaseStock(Long productSkuId, Long userId, long quantity) {
+        if (quantity <= 0) {
+            throw new ProductException(ProductErrorCode.SKU_INVALID_QUANTITY); // 새 에러코드 추천
+        }
+
+        ProductSku sku = findSkuOrThrow(productSkuId);
+        sku.increment(quantity);
+
+        this.updatedAt = LocalDateTime.now();
+        this.updatedBy = userId;
+    }
+
+    private ProductSku findSkuOrThrow(Long productSkuId) {
+        return this.productSkus.stream()
+                .filter(s -> s.getProductSkuId().equals(productSkuId))
+                .findFirst()
+                .orElseThrow(() -> new ProductException(ProductErrorCode.SKU_NOT_FOUND));
+    }
 }

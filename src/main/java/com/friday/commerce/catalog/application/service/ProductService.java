@@ -2,7 +2,8 @@ package com.friday.commerce.catalog.application.service;
 
 
 import com.friday.commerce.catalog.application.dto.product.request.CreateProductRequest;
-import com.friday.commerce.catalog.application.dto.product.response.CreateProductResponse;
+import com.friday.commerce.catalog.application.dto.product.request.IncreaseStockRequest;
+import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.catalog.application.dto.product.response.GetAllProductsResponse;
 import com.friday.commerce.catalog.application.usecase.ProductUseCase;
 import com.friday.commerce.catalog.domain.entity.Category;
@@ -10,7 +11,6 @@ import com.friday.commerce.catalog.domain.entity.Product;
 import com.friday.commerce.catalog.domain.entity.ProductCategory;
 import com.friday.commerce.catalog.domain.entity.ProductImage;
 import com.friday.commerce.catalog.domain.entity.ProductSku;
-import com.friday.commerce.catalog.domain.entity.ProductStatus;
 import com.friday.commerce.catalog.domain.exception.ProductErrorCode;
 import com.friday.commerce.catalog.domain.exception.ProductException;
 import com.friday.commerce.catalog.domain.repository.CategoryRepository;
@@ -35,9 +35,14 @@ public class ProductService implements ProductUseCase {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
+    private Product findProductById(Long productId) {
+        return productRepository.findByProductIdAndDeletedAtIsNullAndDeletedByIsNull(productId)
+                .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+    }
+
     @Transactional
     @Override
-    public CreateProductResponse createProduct(CreateProductRequest request, CurrentUserInfo info) {
+    public GetProductResponse createProduct(CreateProductRequest request, CurrentUserInfo info) {
         // 1) 카테고리 배치 로드
         List<Long> categoryIds = request.distinctCategoryIds();
         if (categoryIds.isEmpty()) {
@@ -65,7 +70,6 @@ public class ProductService implements ProductUseCase {
                         v -> v.sortOrder() != null ? v.sortOrder() : Integer.MAX_VALUE))
                 .toList();
 
-
         for (CreateProductRequest.ImageView v : views) {
             int sort = v.sortOrder() != null ? Math.max(0, v.sortOrder()) : views.indexOf(v);
             String caption =
@@ -85,7 +89,7 @@ public class ProductService implements ProductUseCase {
         product = productRepository.save(product);
 
         // 7) 응답 (이 메서드 내에서 생성한  sku 변수를 사용)
-        return CreateProductResponse.of(product, categories, sku, product.getImages());
+        return GetProductResponse.of(product, categories, sku, product.getImages());
     }
 
     @Transactional(readOnly = true)
@@ -111,5 +115,15 @@ public class ProductService implements ProductUseCase {
                 )
         );
         return PageResponse.from(mapped);
+    }
+
+    @Transactional
+    @Override
+    public GetProductResponse increaseStock(Long productId, Long productSkuId, IncreaseStockRequest request) {
+        Product product = findProductById(productId);
+
+        product.increaseStock(productSkuId, productId, request.quantity());
+
+        return GetProductResponse.of(product);
     }
 }

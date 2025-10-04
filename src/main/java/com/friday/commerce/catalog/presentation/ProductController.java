@@ -1,7 +1,8 @@
 package com.friday.commerce.catalog.presentation;
 
 import com.friday.commerce.catalog.application.dto.product.request.CreateProductRequest;
-import com.friday.commerce.catalog.application.dto.product.response.CreateProductResponse;
+import com.friday.commerce.catalog.application.dto.product.request.IncreaseStockRequest;
+import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.catalog.application.dto.product.response.GetAllProductsResponse;
 import com.friday.commerce.catalog.application.usecase.ProductUseCase;
 import com.friday.commerce.core.security.annotation.CurrentUser;
@@ -18,6 +19,8 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,11 +36,11 @@ public class ProductController {
 
     @RequireRole({UserRole.ADMIN, UserRole.SELLER})
     @PostMapping
-    public ResponseEntity<CreateProductResponse> createProduct(
+    public ResponseEntity<GetProductResponse> createProduct(
             @Valid @RequestBody CreateProductRequest request,
             @CurrentUser CurrentUserInfo info
     ) {
-        CreateProductResponse response = productUseCase.createProduct(request, info);
+        GetProductResponse response = productUseCase.createProduct(request, info);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -68,5 +71,26 @@ public class ProductController {
                 .body(response);
     }
 
+    // 재고 증가
+    @PatchMapping("/{productId}/{productSkuId}/increase")
+    public ResponseEntity<GetProductResponse> increaseStock(
+            @PathVariable Long productId,
+            @PathVariable Long productSkuId,
+            @RequestBody IncreaseStockRequest request
+    ) {
+        GetProductResponse response = productUseCase.increaseStock(productId, productSkuId, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    // 재고 감소
+
+    // 상품 삭제
+
+    // 상품 상태 변경
+
+    // 상품 수정
 
 }
