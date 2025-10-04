@@ -139,4 +139,15 @@ public class ProductService implements ProductUseCase {
 
         return GetProductResponse.of(product);
     }
+
+    @Transactional
+    @Override
+    public GetProductResponse delete(Long productId, CurrentUserInfo info) {
+        Product product = findProductById(productId);
+
+        product.productStatusArchived(info.userId());
+        product.softDelete(info.userId());
+
+        return GetProductResponse.of(product);
+    }
 }

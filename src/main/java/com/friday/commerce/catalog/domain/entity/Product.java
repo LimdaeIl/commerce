@@ -190,4 +190,16 @@ public class Product {
         ProductSku sku = findSkuOrThrow(productSkuId);
         sku.decrement(quantity);
     }
+
+    public void softDelete(Long userId) {
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = userId;
+    }
+
+    public void productStatusArchived(Long userId) {
+        this.status = ProductStatus.ARCHIVED;
+
+        this.updatedAt = LocalDateTime.now();
+        this.updatedBy = userId;
+    }
 }
