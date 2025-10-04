@@ -88,3 +88,13 @@ Authorization: Bearer {{at}}
     }
   ]
 }
+
+
+### 상품 수량 증가
+PATCH http://localhost:10000/api/v1/products/4468806600626176/4468806600626177/increase
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+  "quantity": 100
+}
