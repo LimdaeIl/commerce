@@ -35,7 +35,9 @@ public enum ProductErrorCode implements ErrorCode {
     SKU_NOT_FOUND(HttpStatus.NOT_FOUND, "SKU: SKU 정보를 찾을 수 없습니다."),
     SKU_DUPLICATED(HttpStatus.CONFLICT, "SKU: 이미 존재하는 SKU입니다."),
     SKU_PRICE_INVALID(HttpStatus.BAD_REQUEST, "SKU: 가격이 올바르지 않습니다."),
+    SKU_PRICE_MUST_POSITIVE(HttpStatus.BAD_REQUEST, "SKU: 가격은 양수만 가능합니다."),
     SKU_STOCK_INVALID(HttpStatus.BAD_REQUEST, "SKU: 재고가 올바르지 않습니다."),
+    SKU_INVALID_QUANTITY(HttpStatus.BAD_REQUEST, "SKU: 유효하지 않은 수량입니다."),
     SKU_STOCK_INSUFFICIENT(HttpStatus.BAD_REQUEST, "SKU: 재고가 부족합니다."),
     SKU_ASSIGN_FORBIDDEN(HttpStatus.FORBIDDEN, "SKU: 해당 상품에 SKU를 할당할 수 없습니다."),
 

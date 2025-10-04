@@ -1,5 +1,7 @@
 package com.friday.commerce.catalog.domain.entity;
 
+import com.friday.commerce.catalog.domain.exception.ProductErrorCode;
+import com.friday.commerce.catalog.domain.exception.ProductException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -63,5 +65,10 @@ public class ProductSku {
         this.product = product;
     }
 
-
+    public void increment(long quantity) {
+        if (quantity <= 0) {
+            throw new ProductException(ProductErrorCode.SKU_INVALID_QUANTITY);
+        }
+        this.stock += quantity;
+    }
 }

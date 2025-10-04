@@ -172,4 +172,16 @@ public class Product {
         this.updatedAt = LocalDateTime.now();
         this.updatedBy = userId;
     }
+
+    public void increaseStock(Long productSkuId, long quantity) {
+        ProductSku sku = findSkuOrThrow(productSkuId);
+        sku.increment(quantity);
+    }
+
+    private ProductSku findSkuOrThrow(Long productSkuId) {
+        return this.productSkus.stream()
+                .filter(s -> s.getProductSkuId().equals(productSkuId))
+                .findFirst()
+                .orElseThrow(() -> new ProductException(ProductErrorCode.SKU_NOT_FOUND));
+    }
 }

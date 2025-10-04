@@ -1,7 +1,8 @@
 package com.friday.commerce.catalog.application.usecase;
 
 import com.friday.commerce.catalog.application.dto.product.request.CreateProductRequest;
-import com.friday.commerce.catalog.application.dto.product.response.CreateProductResponse;
+import com.friday.commerce.catalog.application.dto.product.request.IncreaseStockRequest;
+import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.catalog.application.dto.product.response.GetAllProductsResponse;
 import com.friday.commerce.core.security.model.CurrentUserInfo;
 import com.friday.commerce.core.web.response.PageResponse;
@@ -9,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface ProductUseCase {
 
-    CreateProductResponse createProduct(CreateProductRequest request, CurrentUserInfo info);
+    GetProductResponse createProduct(CreateProductRequest request, CurrentUserInfo info);
 
     PageResponse<GetAllProductsResponse> getAllProducts(
             String productName,
@@ -18,4 +19,6 @@ public interface ProductUseCase {
             Integer maxPrice,
             Pageable pageable
     );
+
+    GetProductResponse increaseStock(Long productId,Long productSkuId, IncreaseStockRequest request);
 }
