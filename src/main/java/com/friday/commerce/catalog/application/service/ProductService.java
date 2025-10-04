@@ -2,6 +2,7 @@ package com.friday.commerce.catalog.application.service;
 
 
 import com.friday.commerce.catalog.application.dto.product.request.CreateProductRequest;
+import com.friday.commerce.catalog.application.dto.product.request.DecreaseStockRequest;
 import com.friday.commerce.catalog.application.dto.product.request.IncreaseStockRequest;
 import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.catalog.application.dto.product.response.GetAllProductsResponse;
@@ -123,6 +124,18 @@ public class ProductService implements ProductUseCase {
         Product product = findProductById(productId);
 
         product.increaseStock(productSkuId, request.quantity());
+
+        return GetProductResponse.of(product);
+    }
+
+
+    @Transactional
+    @Override
+    public GetProductResponse decreaseStock(Long productId, Long productSkuId,
+            DecreaseStockRequest request) {
+        Product product = findProductById(productId);
+
+        product.decreaseStock(productSkuId, request.quantity());
 
         return GetProductResponse.of(product);
     }
