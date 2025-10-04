@@ -174,10 +174,6 @@ public class Product {
     }
 
     public void increaseStock(Long productSkuId, long quantity) {
-        if (quantity <= 0) {
-            throw new ProductException(ProductErrorCode.SKU_INVALID_QUANTITY); // 새 에러코드 추천
-        }
-
         ProductSku sku = findSkuOrThrow(productSkuId);
         sku.increment(quantity);
     }

@@ -72,11 +72,12 @@ public class ProductController {
     }
 
     // 재고 증가
+    @RequireRole({UserRole.ADMIN, UserRole.SELLER})
     @PatchMapping("/{productId}/{productSkuId}/increase")
     public ResponseEntity<GetProductResponse> increaseStock(
             @PathVariable Long productId,
             @PathVariable Long productSkuId,
-            @RequestBody IncreaseStockRequest request
+            @RequestBody @Valid IncreaseStockRequest request
     ) {
         GetProductResponse response = productUseCase.increaseStock(productId, productSkuId, request);
 
