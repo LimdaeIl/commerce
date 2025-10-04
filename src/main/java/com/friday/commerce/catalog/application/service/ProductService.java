@@ -56,18 +56,17 @@ public class ProductService implements ProductUseCase {
         // 4) 이미지
         List<CreateProductRequest.ImageView> views = request.imagesView().stream()
                 .sorted(Comparator.comparing(
-                        v -> v.sortOrder() == null ? Integer.MAX_VALUE : v.sortOrder()))
+                        v -> v.sortOrder() != null ? v.sortOrder() : Integer.MAX_VALUE))
                 .toList();
 
-        int order = 0;
+
         for (CreateProductRequest.ImageView v : views) {
-            int sort = (v.sortOrder() == null) ? order : Math.max(0, v.sortOrder());
+            int sort = v.sortOrder() != null ? Math.max(0, v.sortOrder()) : views.indexOf(v);
             String caption =
                     (v.caption() == null || v.caption().isBlank()) ? null : v.caption().trim();
             ProductImage img = ProductImage.create(snowflake.nextId(), null, v.imageUrl(), caption,
                     sort);
             product.addImage(img);
-            order++;
         }
 
         // 5) 카테고리 링크

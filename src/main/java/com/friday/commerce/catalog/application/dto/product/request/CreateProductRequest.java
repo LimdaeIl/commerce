@@ -43,7 +43,7 @@ public class CreateProductRequest {
     private Sku skus;
 
     @Valid
-    private List<Image> images;
+    private List<@NotNull(message = "상품 이미지 항목은 null일 수 없습니다.") Image> images;
 
     public List<Long> distinctCategoryIds() {
         if (categoryIds == null) {
