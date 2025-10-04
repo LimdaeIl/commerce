@@ -1,0 +1,99 @@
+@baseUrl = http://localhost:10000
+
+### @name SignUp_Success
+# 정상 회원가입 시나리오
+POST {{baseUrl}}/api/v1/auth/sign-up
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "Aa!23456",
+  "username": "앨리스123",
+  "agreement": {
+    "termsOfService": true,
+    "privacy": true,
+    "marketing": true
+  },
+  "address": {
+    "zipCode": "06236",
+    "addressLine1": "서울시 강남구 테헤란로 123",
+    "addressLine2": "OO빌딩 5층",
+    "city": "서울",
+    "state": "강남구"
+  }
+}
+
+
+### 로그인 성공 시나리오
+POST http://localhost:10000/api/v1/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "Aa!23456"
+}
+
+> {%
+  client.global.set("userId", response.body.userId.toFixed(0))
+  client.global.set("at", response.body.at)
+  client.global.set("rt", response.body.rt)
+%}
+
+### 카테고리 생성(startParentId, maxDepthOverride: null)
+POST {{baseUrl}}/api/v1/categories
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+  "path": "남자/상의/셔츠",
+  "delimiter": "/"
+}
+
+### 카테고리 생성(maxDepthOverride: null)
+POST {{baseUrl}}/api/v1/categories
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+  "path": "셔츠/린넨",
+  "delimiter": "/",
+  "startParentId": 4432852804440064
+}
+
+### 상품 생성
+POST {{baseUrl}}/api/v1/products
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+  "title": "맨투맨 기모 맨즈",
+  "content": "도톰한 기모 맨투맨 티셔츠입니다.",
+  "categoryIds": [4432852686999552, 4432852770885632, 4432852804440064],
+  "skus": {
+    "price": 29900,
+    "stock": 100
+  },
+  "images": [
+    {
+      "imageUrl": "https://cdn.example.com/img/mtm1.jpg",
+      "caption": "정면",
+      "sortOrder": 0
+    },
+    {
+      "imageUrl": "https://cdn.example.com/img/mtm2.jpg",
+      "caption": "측면",
+      "sortOrder": 1
+    }
+  ]
+}
+
+### 상품 조회
+GET http://localhost:10000/api/v1/products
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+
+}
