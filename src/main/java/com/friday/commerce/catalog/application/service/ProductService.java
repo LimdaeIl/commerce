@@ -3,21 +3,27 @@ package com.friday.commerce.catalog.application.service;
 
 import com.friday.commerce.catalog.application.dto.product.request.CreateProductRequest;
 import com.friday.commerce.catalog.application.dto.product.response.CreateProductResponse;
+import com.friday.commerce.catalog.application.dto.product.response.GetAllProductsResponse;
 import com.friday.commerce.catalog.application.usecase.ProductUseCase;
 import com.friday.commerce.catalog.domain.entity.Category;
 import com.friday.commerce.catalog.domain.entity.Product;
 import com.friday.commerce.catalog.domain.entity.ProductCategory;
 import com.friday.commerce.catalog.domain.entity.ProductImage;
 import com.friday.commerce.catalog.domain.entity.ProductSku;
+import com.friday.commerce.catalog.domain.entity.ProductStatus;
 import com.friday.commerce.catalog.domain.exception.ProductErrorCode;
 import com.friday.commerce.catalog.domain.exception.ProductException;
 import com.friday.commerce.catalog.domain.repository.CategoryRepository;
 import com.friday.commerce.catalog.domain.repository.ProductRepository;
+import com.friday.commerce.catalog.domain.repository.ProductRepository.CardRow;
 import com.friday.commerce.core.security.model.CurrentUserInfo;
 import com.friday.commerce.core.utils.snowflake.Snowflake;
+import com.friday.commerce.core.web.response.PageResponse;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,5 +86,30 @@ public class ProductService implements ProductUseCase {
 
         // 7) 응답 (이 메서드 내에서 생성한  sku 변수를 사용)
         return CreateProductResponse.of(product, categories, sku, product.getImages());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public PageResponse<GetAllProductsResponse> getAllProducts(
+            String productName,
+            Long categoryId,
+            Integer minPrice,
+            Integer maxPrice,
+            Pageable pageable
+    ) {
+        Page<CardRow> page = productRepository.findCardsBySimpleCondition(
+                productName, categoryId, minPrice, maxPrice, pageable
+        );
+
+        Page<GetAllProductsResponse> mapped = page.map(cardRow ->
+                new GetAllProductsResponse(
+                        cardRow.getProductId(),
+                        cardRow.getTitle(),
+                        cardRow.getStatus(),    // enum 그대로
+                        cardRow.getMinPrice(),
+                        cardRow.getThumbnailUrl()
+                )
+        );
+        return PageResponse.from(mapped);
     }
 }
