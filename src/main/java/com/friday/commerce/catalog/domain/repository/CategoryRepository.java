@@ -18,6 +18,8 @@ public interface CategoryRepository {
 
     Optional<Category> findByCategoryIdAndDeletedAtIsNull(Long categoryId);
 
+    List<Category> findAllByCategoryIdInAndDeletedAtIsNull(List<Long> ids);
+
     boolean existsByParentIsNullAndNameAndDeletedAtIsNull(String newName);
 
     boolean existsByParentAndNameAndDeletedAtIsNull(Category parent, String newName);
