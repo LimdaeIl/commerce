@@ -122,7 +122,7 @@ public class ProductService implements ProductUseCase {
     public GetProductResponse increaseStock(Long productId, Long productSkuId, IncreaseStockRequest request) {
         Product product = findProductById(productId);
 
-        product.increaseStock(productSkuId, productId, request.quantity());
+        product.increaseStock(productSkuId, request.quantity());
 
         return GetProductResponse.of(product);
     }
