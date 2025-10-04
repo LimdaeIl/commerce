@@ -32,7 +32,7 @@ public class ProductService implements ProductUseCase {
     @Transactional
     @Override
     public CreateProductResponse createProduct(CreateProductRequest request, CurrentUserInfo info) {
-        // 1) 카테고리 배치 로드 (권장)
+        // 1) 카테고리 배치 로드
         List<Long> categoryIds = request.distinctCategoryIds();
         if (categoryIds.isEmpty()) {
             throw new ProductException(ProductErrorCode.CATEGORY_NOT_FOUND);
@@ -79,7 +79,7 @@ public class ProductService implements ProductUseCase {
         // 6) 저장
         product = productRepository.save(product);
 
-        // 7) 응답 (이미 보유한 sku 변수를 사용)
+        // 7) 응답 (이 메서드 내에서 생성한  sku 변수를 사용)
         return CreateProductResponse.of(product, categories, sku, product.getImages());
     }
 }
