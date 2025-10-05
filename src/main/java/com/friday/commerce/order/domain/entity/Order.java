@@ -74,6 +74,7 @@ public class Order {
         this.orderId = orderId;
         this.userId = userId;
         this.orderStatus = orderStatus;
+        this.orderItems = orderItems != null ? new ArrayList<>(orderItems) : new ArrayList<>();
         this.ordererAddress = ordererAddress;
         this.totalAmount = totalAmount;
         this.createdAt = LocalDateTime.now();
@@ -82,10 +83,6 @@ public class Order {
         this.updatedBy = null;
         this.deletedAt = null;
         this.deletedBy = null;
-
-        if (!orderItems.isEmpty() || ordererAddress != null) {
-            this.orderItems = orderItems;
-        }
     }
 
     public static Order create(
