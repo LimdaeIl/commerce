@@ -21,9 +21,10 @@ public interface ProductUseCase {
             Pageable pageable
     );
 
-    GetProductResponse increaseStock(Long productId,Long productSkuId, IncreaseStockRequest request);
-
-    GetProductResponse decreaseStock(Long productId, Long productSkuId, DecreaseStockRequest request);
+    GetProductResponse increaseStock(Long productId, IncreaseStockRequest request);
+    GetProductResponse decreaseStock(Long productId, DecreaseStockRequest request);
 
     GetProductResponse delete(Long productId, CurrentUserInfo info);
+
+    GetProductResponse getProduct(Long productId);
 }

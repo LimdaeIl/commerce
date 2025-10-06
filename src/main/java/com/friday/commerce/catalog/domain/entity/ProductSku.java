@@ -7,7 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -24,8 +24,8 @@ public class ProductSku {
     @Column(name = "product_sku_id", nullable = false, updatable = false)
     private Long productSkuId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "product_id", nullable = false, unique = true)
     private Product product;
 
     @Column(name = "price", nullable = false)
@@ -49,19 +49,17 @@ public class ProductSku {
 
     public static ProductSku create(
             Long productSkuId,
-            Product product,
             Long price,
             Long stock
     ) {
         return ProductSku.builder()
                 .productSkuId(productSkuId)
-                .product(product)
                 .price(price)
                 .stock(stock)
                 .build();
     }
 
-    void assignTo(Product product) {
+    void setProduct(Product product) {
         this.product = product;
     }
 
@@ -76,11 +74,9 @@ public class ProductSku {
         if (quantity <= 0) {
             throw new ProductException(ProductErrorCode.SKU_INVALID_QUANTITY);
         }
-
         if (quantity > stock) {
             throw new ProductException(ProductErrorCode.SKU_STOCK_INSUFFICIENT);
         }
-
         this.stock -= quantity;
     }
 }
