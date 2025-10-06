@@ -1,8 +1,7 @@
 package com.friday.commerce.order.domain.exception;
 
-public class OrderException extends RuntimeException {
+import com.friday.commerce.core.web.exception.AppException;
 
-    public OrderException(OrderErrorCode errorCode) {
-        super(errorCode.getMessage());
-    }
+public class OrderException extends AppException {
+    public OrderException(OrderErrorCode errorCode) { super(errorCode); }
 }
