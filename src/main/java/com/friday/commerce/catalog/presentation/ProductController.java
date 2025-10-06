@@ -87,14 +87,13 @@ public class ProductController {
 
     // 재고 증가
     @RequireRole({UserRole.ADMIN, UserRole.SELLER})
-    @PatchMapping("/{productId}/{productSkuId}/increase")
+    @PatchMapping("/{productId}/increase")
     public ResponseEntity<GetProductResponse> increaseStock(
             @PathVariable Long productId,
-            @PathVariable Long productSkuId,
             @RequestBody @Valid IncreaseStockRequest request
     ) {
-        GetProductResponse response = productUseCase.increaseStock(productId, productSkuId,
-                request);
+        GetProductResponse response = productUseCase.increaseStock(productId, request);
+
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -103,14 +102,13 @@ public class ProductController {
 
     // 재고 감소
     @RequireRole({UserRole.ADMIN, UserRole.SELLER})
-    @PatchMapping("/{productId}/{productSkuId}/decrease")
+    @PatchMapping("/{productId}/decrease")
     public ResponseEntity<GetProductResponse> decreaseStock(
             @PathVariable Long productId,
-            @PathVariable Long productSkuId,
             @RequestBody @Valid DecreaseStockRequest request
     ) {
-        GetProductResponse response = productUseCase.decreaseStock(productId, productSkuId,
-                request);
+        GetProductResponse response = productUseCase.decreaseStock(productId, request);
+
 
         return ResponseEntity
                 .status(HttpStatus.OK)

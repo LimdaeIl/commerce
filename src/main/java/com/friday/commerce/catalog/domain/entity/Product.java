@@ -142,7 +142,9 @@ public class Product {
         if (this.productSku != null) {
             this.productSku.setProduct(null);
         }
+
         this.productSku = newSku;
+
         // 역방향 연결
         if (newSku != null && newSku.getProduct() != this) {
             newSku.setProduct(this); // 소유측에 FK 세팅

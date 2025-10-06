@@ -67,10 +67,10 @@ public class ProductService implements ProductUseCase {
         // 3) SKU (1:1) — create가 양방향(setSku)까지 책임지도록!
         ProductSku sku = ProductSku.create(
                 snowflake.nextId(),
-                product,
                 request.getPrice(),
                 request.getStock()
         );
+        product.setSku(sku);
 
         // 4) 이미지
         List<CreateProductRequest.ImageView> views = request.imagesView().stream()
@@ -127,20 +127,17 @@ public class ProductService implements ProductUseCase {
         return PageResponse.from(mapped);
     }
 
-    @Transactional
     @Override
-    public GetProductResponse increaseStock(Long productId, Long productSkuId,
-            IncreaseStockRequest request) {
-        // 1:1이므로 skuId는 사용하지 않아도 됨(호환성 위해 파라미터만 유지)
+    public GetProductResponse increaseStock(Long productId, IncreaseStockRequest request) {
         Product product = findProductById(productId);
-        product.increaseStock(request.quantity()); // Product.ensureSku() 내부에서 SKU 검증
+        product.increaseStock(request.quantity()); // ensureSku() 내부에서 검증
         return GetProductResponse.of(product);
     }
 
+
     @Transactional
     @Override
-    public GetProductResponse decreaseStock(Long productId, Long productSkuId,
-            DecreaseStockRequest request) {
+    public GetProductResponse decreaseStock(Long productId, DecreaseStockRequest request) {
         Product product = findProductById(productId);
         product.decreaseStock(request.quantity());
         return GetProductResponse.of(product);

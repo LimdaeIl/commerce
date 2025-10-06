@@ -49,22 +49,14 @@ public class ProductSku {
 
     public static ProductSku create(
             Long productSkuId,
-            Product product,
             Long price,
             Long stock
     ) {
-        ProductSku sku = ProductSku.builder()
+        return ProductSku.builder()
                 .productSkuId(productSkuId)
-                .product(product)
                 .price(price)
                 .stock(stock)
                 .build();
-
-        if (product != null) {
-            product.setSku(sku);
-        }
-
-        return sku;
     }
 
     void setProduct(Product product) {
