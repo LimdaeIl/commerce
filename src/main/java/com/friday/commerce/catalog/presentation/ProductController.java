@@ -3,8 +3,8 @@ package com.friday.commerce.catalog.presentation;
 import com.friday.commerce.catalog.application.dto.product.request.CreateProductRequest;
 import com.friday.commerce.catalog.application.dto.product.request.DecreaseStockRequest;
 import com.friday.commerce.catalog.application.dto.product.request.IncreaseStockRequest;
-import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.catalog.application.dto.product.response.GetAllProductsResponse;
+import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.catalog.application.usecase.ProductUseCase;
 import com.friday.commerce.core.security.annotation.CurrentUser;
 import com.friday.commerce.core.security.annotation.RequireRole;
@@ -49,6 +49,18 @@ public class ProductController {
                 .body(response);
     }
 
+    @GetMapping("/{productId}")
+    public ResponseEntity<GetProductResponse> getProduct(
+            @PathVariable Long productId
+    ) {
+        GetProductResponse response = productUseCase.getProduct(productId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+
+    }
+
     @GetMapping
     public ResponseEntity<PageResponse<GetAllProductsResponse>> getAllProducts(
             @RequestParam(required = false) String productName,
@@ -81,7 +93,8 @@ public class ProductController {
             @PathVariable Long productSkuId,
             @RequestBody @Valid IncreaseStockRequest request
     ) {
-        GetProductResponse response = productUseCase.increaseStock(productId, productSkuId, request);
+        GetProductResponse response = productUseCase.increaseStock(productId, productSkuId,
+                request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -96,7 +109,8 @@ public class ProductController {
             @PathVariable Long productSkuId,
             @RequestBody @Valid DecreaseStockRequest request
     ) {
-        GetProductResponse response = productUseCase.decreaseStock(productId, productSkuId, request);
+        GetProductResponse response = productUseCase.decreaseStock(productId, productSkuId,
+                request);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

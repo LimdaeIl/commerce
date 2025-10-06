@@ -7,10 +7,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +43,8 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductCategory> productCategories = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductSku> productSkus = new ArrayList<>();
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private ProductSku productSku;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images = new ArrayList<>();
@@ -100,23 +101,7 @@ public class Product {
                 .createdBy(createdBy)
                 .build();
     }
-
-    public void addSku(ProductSku sku) {
-        sku.assignTo(this);
-        this.productSkus.add(sku);
-    }
-
-    public void replaceSkus(List<ProductSku> skus) {
-        this.productSkus.forEach(sku -> sku.assignTo(null));
-        this.productSkus.clear();
-        if (skus == null) {
-            return;
-        }
-
-        for (ProductSku s : skus) {
-            addSku(s);
-        }
-    }
+    /* ---------- 이미지/카테고리 편의 메서드 기존 유지 ---------- */
 
     public void addImage(ProductImage image) {
         image.assignTo(this);
@@ -130,7 +115,6 @@ public class Product {
         if (images == null) {
             return;
         }
-
         for (ProductImage image : images) {
             addImage(image);
         }
@@ -148,9 +132,20 @@ public class Product {
         if (newLinks == null) {
             return;
         }
-
         for (ProductCategory pc : newLinks) {
             pc.assignTo(this);
+        }
+    }
+
+    public void setSku(ProductSku newSku) {
+        // 기존 연결 제거
+        if (this.productSku != null) {
+            this.productSku.setProduct(null);
+        }
+        this.productSku = newSku;
+        // 역방향 연결
+        if (newSku != null && newSku.getProduct() != this) {
+            newSku.setProduct(this); // 소유측에 FK 세팅
         }
     }
 
@@ -158,7 +153,6 @@ public class Product {
         if (this.status == ProductStatus.PUBLISHED) {
             throw new ProductException(ProductErrorCode.PRODUCT_STATUS_SAME_BEFORE);
         }
-
         this.status = ProductStatus.PUBLISHED;
         this.updatedAt = LocalDateTime.now();
         this.updatedBy = userId;
@@ -168,27 +162,26 @@ public class Product {
         if (this.status == ProductStatus.ARCHIVED) {
             throw new ProductException(ProductErrorCode.PRODUCT_STATUS_SAME_BEFORE);
         }
-
         this.status = ProductStatus.ARCHIVED;
         this.updatedAt = LocalDateTime.now();
         this.updatedBy = userId;
     }
 
-    public void increaseStock(Long productSkuId, long quantity) {
-        ProductSku sku = findSkuOrThrow(productSkuId);
+    public void increaseStock(long quantity) {
+        ProductSku sku = ensureSku();
         sku.increment(quantity);
     }
 
-    private ProductSku findSkuOrThrow(Long productSkuId) {
-        return this.productSkus.stream()
-                .filter(s -> s.getProductSkuId().equals(productSkuId))
-                .findFirst()
-                .orElseThrow(() -> new ProductException(ProductErrorCode.SKU_NOT_FOUND));
+    public void decreaseStock(long quantity) {
+        ProductSku sku = ensureSku();
+        sku.decrement(quantity);
     }
 
-    public void decreaseStock(Long productSkuId, long quantity) {
-        ProductSku sku = findSkuOrThrow(productSkuId);
-        sku.decrement(quantity);
+    private ProductSku ensureSku() {
+        if (this.productSku == null) {
+            throw new ProductException(ProductErrorCode.SKU_NOT_FOUND);
+        }
+        return this.productSku;
     }
 
     public void softDelete(Long userId) {
@@ -198,7 +191,6 @@ public class Product {
 
     public void productStatusArchived(Long userId) {
         this.status = ProductStatus.ARCHIVED;
-
         this.updatedAt = LocalDateTime.now();
         this.updatedBy = userId;
     }

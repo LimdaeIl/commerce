@@ -4,8 +4,8 @@ package com.friday.commerce.catalog.application.service;
 import com.friday.commerce.catalog.application.dto.product.request.CreateProductRequest;
 import com.friday.commerce.catalog.application.dto.product.request.DecreaseStockRequest;
 import com.friday.commerce.catalog.application.dto.product.request.IncreaseStockRequest;
-import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.catalog.application.dto.product.response.GetAllProductsResponse;
+import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.catalog.application.usecase.ProductUseCase;
 import com.friday.commerce.catalog.domain.entity.Category;
 import com.friday.commerce.catalog.domain.entity.Product;
@@ -57,13 +57,20 @@ public class ProductService implements ProductUseCase {
         }
 
         // 2) 상품 생성
-        Product product = Product.create(snowflake.nextId(), request.getTitle(),
-                request.getContent(), info.userId());
+        Product product = Product.create(
+                snowflake.nextId(),
+                request.getTitle(),
+                request.getContent(),
+                info.userId()
+        );
 
-        // 3) SKU (V1: 1개)
-        ProductSku sku = ProductSku.create(snowflake.nextId(), null, request.getPrice(),
-                request.getStock());
-        product.addSku(sku);
+        // 3) SKU (1:1) — create가 양방향(setSku)까지 책임지도록!
+        ProductSku sku = ProductSku.create(
+                snowflake.nextId(),
+                product,
+                request.getPrice(),
+                request.getStock()
+        );
 
         // 4) 이미지
         List<CreateProductRequest.ImageView> views = request.imagesView().stream()
@@ -71,12 +78,14 @@ public class ProductService implements ProductUseCase {
                         v -> v.sortOrder() != null ? v.sortOrder() : Integer.MAX_VALUE))
                 .toList();
 
-        for (CreateProductRequest.ImageView v : views) {
-            int sort = v.sortOrder() != null ? Math.max(0, v.sortOrder()) : views.indexOf(v);
+        for (int i = 0; i < views.size(); i++) {
+            CreateProductRequest.ImageView v = views.get(i);
+            int sort = v.sortOrder() != null ? Math.max(0, v.sortOrder()) : i;
             String caption =
                     (v.caption() == null || v.caption().isBlank()) ? null : v.caption().trim();
-            ProductImage img = ProductImage.create(snowflake.nextId(), null, v.imageUrl(), caption,
-                    sort);
+            ProductImage img = ProductImage.create(
+                    snowflake.nextId(), null, v.imageUrl(), caption, sort
+            );
             product.addImage(img);
         }
 
@@ -87,9 +96,9 @@ public class ProductService implements ProductUseCase {
         }
 
         // 6) 저장
-        product = productRepository.save(product);
+        product = productRepository.save(product); // cascade로 sku, images, links 저장
 
-        // 7) 응답 (이 메서드 내에서 생성한  sku 변수를 사용)
+        // 7) 응답
         return GetProductResponse.of(product, categories, sku, product.getImages());
     }
 
@@ -110,8 +119,8 @@ public class ProductService implements ProductUseCase {
                 new GetAllProductsResponse(
                         cardRow.getProductId(),
                         cardRow.getTitle(),
-                        cardRow.getStatus(),    // enum 그대로
-                        cardRow.getMinPrice(),
+                        cardRow.getStatus(),
+                        cardRow.getMinPrice(),      // 1:1이어도 그대로 사용 가능(= 단일 가격)
                         cardRow.getThumbnailUrl()
                 )
         );
@@ -120,23 +129,20 @@ public class ProductService implements ProductUseCase {
 
     @Transactional
     @Override
-    public GetProductResponse increaseStock(Long productId, Long productSkuId, IncreaseStockRequest request) {
+    public GetProductResponse increaseStock(Long productId, Long productSkuId,
+            IncreaseStockRequest request) {
+        // 1:1이므로 skuId는 사용하지 않아도 됨(호환성 위해 파라미터만 유지)
         Product product = findProductById(productId);
-
-        product.increaseStock(productSkuId, request.quantity());
-
+        product.increaseStock(request.quantity()); // Product.ensureSku() 내부에서 SKU 검증
         return GetProductResponse.of(product);
     }
-
 
     @Transactional
     @Override
     public GetProductResponse decreaseStock(Long productId, Long productSkuId,
             DecreaseStockRequest request) {
         Product product = findProductById(productId);
-
-        product.decreaseStock(productSkuId, request.quantity());
-
+        product.decreaseStock(request.quantity());
         return GetProductResponse.of(product);
     }
 
@@ -144,10 +150,15 @@ public class ProductService implements ProductUseCase {
     @Override
     public GetProductResponse delete(Long productId, CurrentUserInfo info) {
         Product product = findProductById(productId);
-
         product.productStatusArchived(info.userId());
         product.softDelete(info.userId());
+        return GetProductResponse.of(product);
+    }
 
+    @Transactional(readOnly = true)
+    @Override
+    public GetProductResponse getProduct(Long productId) {
+        Product product = findProductById(productId);
         return GetProductResponse.of(product);
     }
 }
