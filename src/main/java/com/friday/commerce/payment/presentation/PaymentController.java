@@ -2,6 +2,7 @@ package com.friday.commerce.payment.presentation;
 
 import com.friday.commerce.core.security.annotation.CurrentUser;
 import com.friday.commerce.core.security.model.CurrentUserInfo;
+import com.friday.commerce.order.application.dto.response.OrderBriefResponse;
 import com.friday.commerce.payment.application.dto.response.ConfirmPaymentResponse;
 import com.friday.commerce.payment.application.dto.request.ConfirmPaymentRequest;
 import com.friday.commerce.payment.application.usecase.PaymentUseCase;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,13 +39,13 @@ public class PaymentController {
     }
 
     @GetMapping("/success")
-    public ResponseEntity<Void> successRedirect(
+    public ResponseEntity<ConfirmPaymentResponse> success(
             @RequestParam String paymentKey,
-            @RequestParam Long orderId,
-            @RequestParam Integer amount) {
-        // 여기서는 바로 confirm 하지 않고 프런트 완료 페이지로 리다이렉트
-        URI to = URI.create("/payments/complete?paymentKey=" + paymentKey + "&orderId=" + orderId + "&amount=" + amount);
-        return ResponseEntity.status(HttpStatus.FOUND).location(to).build();
+            @RequestParam Long orderId
+    ) {
+        ConfirmPaymentRequest request = new ConfirmPaymentRequest(paymentKey, orderId);
+        ConfirmPaymentResponse response = paymentUseCase.confirm(request, null);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/fail")
@@ -51,12 +53,9 @@ public class PaymentController {
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String message
     ) {
-        // 클라이언트에 에러 보여주거나, 프런트로 리다이렉트
         return ResponseEntity.status(400).body(Map.of(
                 "code", code == null ? "UNKNOWN" : code,
                 "message", message == null ? "결제 실패" : message
         ));
     }
-
-
 }
