@@ -72,52 +72,58 @@
     document.getElementById('log').textContent = String(msg);
   }
 
-  function won(n) {
-    return Number(n).toLocaleString('ko-KR') + '원';
-  }
+  const won = n => Number(n).toLocaleString('ko-KR') + '원';
 
-  window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', async () => {
     const qp = new URLSearchParams(location.search);
     const orderId = qp.get('orderId');
-    const amount = Number(qp.get('amount'));
+    if (!orderId) {
+      log('orderId 파라미터가 없습니다.');
+      return;
+    }
 
     const orderIdTxt = document.getElementById('orderIdTxt');
     const amountTxt = document.getElementById('amountTxt');
     const payBtn = document.getElementById('pay');
-
-    // 파라미터 검증
-    if (!orderId || !Number.isFinite(amount) || amount <= 0) {
-      log('orderId/amount 파라미터가 없습니다. 주문을 먼저 생성하세요.');
-      return;
-    }
     orderIdTxt.textContent = orderId;
-    amountTxt.textContent = won(amount);
 
-    // Toss SDK 로드 확인
-    if (typeof window.TossPayments === 'undefined') {
-      log('TossPayments SDK가 로드되지 않았습니다. 네트워크/애드블록/CORS를 확인하세요. (https://js.tosspayments.com/v1)');
-      return;
-    }
-    console.log('TossPayments SDK loaded');
+    // (A) 주문 요약 JSON을 서버에서 조회
+    try {
+      // 필요에 따라 Authorization 헤더 추가(아래 보안 섹션 참고)
+      const brief = await fetch(`/api/v1/orders/${orderId}/brief`).then(r => {
+        if (!r.ok) {
+          throw new Error('주문 요약 조회 실패');
+        }
+        return r.json();
+      });
+      const amount = brief.totalAmount;         // 서버 진실값
+      amountTxt.textContent = won(amount);
 
-    const tossPayments = TossPayments('test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq');
-
-    payBtn.disabled = false;
-    payBtn.addEventListener('click', async () => {
-      try {
-        await tossPayments.requestPayment('카드', {
-          amount,
-          orderId,
-          orderName: `주문 #${orderId}`,
-          successUrl: 'http://localhost:10000/api/v1/payments/success',
-          failUrl: 'http://localhost:10000/api/v1/payments/fail',
-        });
-      } catch (err) {
-        console.error('requestPayment error =', err);
-        const msg = err?.code ? `${err.code} ${err.message}` : (err?.message || '결제창 호출 실패');
-        document.getElementById('log').textContent = msg;
+      // Toss SDK 준비
+      if (typeof window.TossPayments === 'undefined') {
+        log('TossPayments SDK 로드 실패');
+        return;
       }
-    });
+      const tossPayments = TossPayments('test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq');
+      const redirectBase = `${location.origin}/api/v1/payments`;
+
+      payBtn.disabled = false;
+      payBtn.onclick = async () => {
+        try {
+          await tossPayments.requestPayment('카드', {
+            amount,                      // URL이 아닌 "서버 금액"
+            orderId,
+            orderName: `주문 #${orderId}`,
+            successUrl: `${redirectBase}/success`,
+            failUrl: `${redirectBase}/fail`,
+          });
+        } catch (err) {
+          log(err?.code ? `${err.code} ${err.message}` : (err?.message || '결제창 호출 실패'));
+        }
+      };
+    } catch (e) {
+      log(e.message || e);
+    }
   });
 </script>
 </body>
