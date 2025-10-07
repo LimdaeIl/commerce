@@ -6,9 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeParseException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,16 +24,16 @@ public class Payment {
     private String paymentKey;
 
     @Column(name = "order_id", nullable = false, length = 64)
-    private String orderId;
+    private Long orderId;
 
     @Column(name = "amount", nullable = false)
-    private Integer amount;
+    private Integer totalAmount;
 
     @Column(name = "method", length = 40)
     private String method;
 
     @Column(name = "status", length = 40)
-    private String status;
+    private PaymentStatus paymentStatus;
 
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
@@ -44,35 +41,46 @@ public class Payment {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    private Payment(Long id, String paymentKey, String orderId, Integer amount) {
+    private Payment(
+            Long id,
+            String paymentKey,
+            Long orderId,
+            Integer totalAmount,
+            LocalDateTime approvedAt
+            ) {
         this.paymentId = id;
         this.paymentKey = paymentKey;
         this.orderId = orderId;
-        this.amount = amount;
+        this.totalAmount = totalAmount;
         this.createdAt = LocalDateTime.now();
+        this.approvedAt = approvedAt;
     }
 
-    public static Payment pending(Long id, String paymentKey, String orderId, Integer amount) {
-        return new Payment(id, paymentKey, orderId, amount);
+    public static Payment create(
+            Long paymentId,
+            String paymentKey,
+            Long orderId,
+            Integer amount,
+            LocalDateTime approvedAt
+            ) {
+        return new Payment(
+                paymentId,
+                paymentKey,
+                orderId,
+                amount,
+                approvedAt);
     }
 
-    public void markApproved(String method, String status, String approvedAt) {
+    public void markApproved(
+            String method,
+            PaymentStatus paymentStatus,
+            LocalDateTime approvedAt) {
         this.method = method;
-        this.status = status;
-
-        if (approvedAt != null) {
-            try {
-                // "+09:00" 같은 오프셋 포함 문자열 처리
-                OffsetDateTime odt = OffsetDateTime.parse(approvedAt);
-                this.approvedAt = odt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
-            } catch (DateTimeParseException e) {
-                // 오프셋 없는 "yyyy-MM-dd'T'HH:mm:ss" 형태 대응
-                this.approvedAt = LocalDateTime.parse(approvedAt);
-            }
-        }
+        this.paymentStatus = paymentStatus;
+        this.approvedAt = approvedAt;
     }
 
-    public void markCanceled(String status) {
-        this.status = status;
+    public void markCanceled(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 }

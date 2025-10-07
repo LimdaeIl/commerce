@@ -19,7 +19,8 @@ public enum PaymentErrorCode implements ErrorCode {
     PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "결제: 결제 금액이 주문 금액과 일치하지 않습니다."),
 
     // 주문 연동 관련(결제 관점에서 노출)
-    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "결제: 주문을 찾을 수 없습니다.");
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "결제: 주문을 찾을 수 없습니다."),
+    ORDER_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "결제: 주문금액이 일치하지 않습니다.");
 
     private final HttpStatus status;
     private final String message;
