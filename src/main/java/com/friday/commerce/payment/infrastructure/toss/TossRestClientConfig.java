@@ -15,7 +15,7 @@ public class TossRestClientConfig {
     @Bean
     public RestClient tossRestClient(TossPaymentsProperties props) {
         String basic = Base64.getEncoder()
-                .encodeToString((props.secretKey() + ":").getBytes(StandardCharsets.UTF_8)); // Basic secretKey:
+                .encodeToString((props.secretKey() + ":").getBytes(StandardCharsets.UTF_8));
 
         return RestClient.builder()
                 .baseUrl(props.baseUrl())
