@@ -5,10 +5,12 @@ import static java.util.stream.Collectors.summingInt;
 
 import com.friday.commerce.core.security.model.CurrentUserInfo;
 import com.friday.commerce.core.utils.snowflake.Snowflake;
+import com.friday.commerce.core.web.response.PageResponse;
 import com.friday.commerce.order.application.dto.request.CreateOrderItemRequest;
 import com.friday.commerce.order.application.dto.request.CreateOrderRequest;
 import com.friday.commerce.order.application.dto.request.DeliveryAddressRequest;
 import com.friday.commerce.order.application.dto.response.CreateOrderResponse;
+import com.friday.commerce.order.application.dto.response.GetOrderResponse;
 import com.friday.commerce.order.application.port.out.CatalogPort;
 import com.friday.commerce.order.application.usecase.OrderUseCase;
 import com.friday.commerce.order.domain.entity.Order;
@@ -19,10 +21,15 @@ import com.friday.commerce.order.domain.entity.ProductBrief;
 import com.friday.commerce.order.domain.exception.OrderErrorCode;
 import com.friday.commerce.order.domain.exception.OrderException;
 import com.friday.commerce.order.domain.repository.OrderRepository;
+import com.friday.commerce.order.domain.repository.OrderRepository.ListRow;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,5 +131,47 @@ public class OrderService implements OrderUseCase {
         Order save = orderRepository.save(order);
 
         return CreateOrderResponse.of(save);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public PageResponse<GetOrderResponse> getOrders(
+            CurrentUserInfo info,
+            String keyword,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    ) {
+        // 1) 키워드 정규화 (빈 문자열은 검색 제외)
+        String kw = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
+
+        // 2) 날짜 경계 계산 (to는 다음날 0시 미만)
+        LocalDateTime fromDt = (from != null) ? from.atStartOfDay() : null;
+        LocalDateTime toDt   = (to   != null) ? to.plusDays(1).atStartOfDay() : null;
+
+        // 3) 범위 유효성
+        if (fromDt != null && toDt != null && !fromDt.isBefore(toDt)) {
+            throw new OrderException(OrderErrorCode.ORDER_INVALID);
+        }
+
+        // 4) 조회 + 매핑
+        Page<ListRow> page = orderRepository.findOrderList(
+                info.userId(), kw, fromDt, toDt, pageable
+        );
+
+        Page<GetOrderResponse> mapped = page.map(r ->
+                new GetOrderResponse(
+                        r.getOrderId(),
+                        r.getOrderStatus().name(),
+                        r.getTotalAmount(),
+                        r.getItemCount(),
+                        r.getCreatedAt(),
+                        r.getPrimaryProductName(),
+                        r.getPrimaryImageUrl()
+                )
+        );
+
+        // 5) 표준 페이징 응답
+        return PageResponse.from(mapped);
     }
 }
