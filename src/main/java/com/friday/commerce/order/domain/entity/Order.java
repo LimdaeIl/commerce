@@ -107,19 +107,18 @@ public class Order {
                 .build();
     }
 
-    public void markPaid(Long actorId) {
+    public void markPaid(Long userId) {
         if (this.deletedAt != null) {
             throw new OrderException(OrderErrorCode.ORDER_NOT_FOUND);
         }
         if (this.orderStatus == OrderStatus.PAID) {
-            // 멱등: 이미 PAID면 그냥 조용히 리턴해도 됨 (선호) return;
-            throw new OrderException(OrderErrorCode.ORDER_ALREADY_PAID);
+             return; // 멱등: 이미 PAID면 그냥 조용히 리턴
         }
         if (this.orderStatus != OrderStatus.CREATED) {
             throw new OrderException(OrderErrorCode.ORDER_STATUS_INVALID);
         }
         this.orderStatus = OrderStatus.PAID;
         this.updatedAt = java.time.LocalDateTime.now();
-        this.updatedBy = actorId;
+        this.updatedBy = userId;
     }
 }
