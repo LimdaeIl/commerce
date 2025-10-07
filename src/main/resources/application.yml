@@ -149,14 +149,21 @@ security:
       exclude-path-patterns:
         - /actuator/**
         - /docs/**
-        - /api/v1/auth/**
+        - /checkout.html
+        - /favicon.ico
+        - /api/v1/payments/**
       optional-path-patterns:
         - /users/**
       include-path-patterns:
-        /api/**
+        - /api/**
 
 commerce:
   catalog:
     category:
       max-depth: 5   # 기본값. 추후 4, 7 등 자유롭게 변경 가능
       hard-limit: 7 # 방어선(요청 오버라이드의 상한)
+
+toss:
+  base-url: https://api.tosspayments.com
+  clientKey: test_gck_docs_Ovk5rK1EwkEbP0W43n07Xlzm
+  secretKey: test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R
