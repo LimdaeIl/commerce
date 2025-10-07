@@ -8,10 +8,7 @@ public record ConfirmPaymentRequest(
         String paymentKey,
 
         @NotNull(message = "결제: 주문 ID는 필수입니다.")
-        Long orderId,
-
-        @NotNull(message = "결제: 전체 결제금액은 필수 입니다.")
-        Integer amount
+        Long orderId
 ) {
 
 }
