@@ -6,9 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeParseException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,32 +41,43 @@ public class Payment {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    private Payment(Long id, String paymentKey, Long orderId, Integer totalAmount) {
+    private Payment(
+            Long id,
+            String paymentKey,
+            Long orderId,
+            Integer totalAmount,
+            LocalDateTime approvedAt
+            ) {
         this.paymentId = id;
         this.paymentKey = paymentKey;
         this.orderId = orderId;
         this.totalAmount = totalAmount;
         this.createdAt = LocalDateTime.now();
+        this.approvedAt = approvedAt;
     }
 
-    public static Payment pending(
+    public static Payment create(
             Long paymentId,
             String paymentKey,
             Long orderId,
-            Integer amount) {
+            Integer amount,
+            LocalDateTime approvedAt
+            ) {
         return new Payment(
                 paymentId,
                 paymentKey,
                 orderId,
-                amount);
+                amount,
+                approvedAt);
     }
 
     public void markApproved(
             String method,
-            PaymentStatus paymentStatus) {
+            PaymentStatus paymentStatus,
+            LocalDateTime approvedAt) {
         this.method = method;
         this.paymentStatus = paymentStatus;
-        this.approvedAt = LocalDateTime.now();
+        this.approvedAt = approvedAt;
     }
 
     public void markCanceled(PaymentStatus paymentStatus) {
