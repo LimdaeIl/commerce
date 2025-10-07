@@ -152,6 +152,8 @@ security:
         - /checkout.html
         - /favicon.ico
         - /api/v1/payments/**
+        - /api/v1/auth/**
+        - /api/v1/orders/*/brief
       optional-path-patterns:
         - /users/**
       include-path-patterns:
@@ -165,5 +167,5 @@ commerce:
 
 toss:
   base-url: https://api.tosspayments.com
-  clientKey: test_gck_docs_Ovk5rK1EwkEbP0W43n07Xlzm
-  secretKey: test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R
+  clientKey: ${TOSS_CLIENT_KEY}
+  secretKey: ${TOSS_SECRET_KEY}
