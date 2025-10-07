@@ -1,7 +1,11 @@
 package com.friday.commerce.catalog.infrastructure.jpa;
 
+import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
+import com.friday.commerce.catalog.application.dto.product.response.ProductBriefResponse;
 import com.friday.commerce.catalog.domain.entity.Product;
 import com.friday.commerce.catalog.domain.repository.ProductRepository;
+import java.util.Collection;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +13,28 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ProductJpaRepository extends JpaRepository<Product, Long>, ProductRepository {
+
+    @Override
+    @Query("""
+        select p from Product p
+        where p.productId in :ids
+          and p.deletedAt is null
+    """)
+    List<Product> findAllByProductIdInAndDeletedAtIsNull(@Param("ids") Collection<Long> ids);
+
+
+    @Override
+    @Query("""
+        select new com.friday.commerce.catalog.application.dto.product.response.ProductBriefResponse(
+            p.productId, p.title, s.price, s.stock, cast(p.status as string)
+        )
+        from Product p
+        join p.productSku s
+        where p.productId in :ids
+          and p.deletedAt is null
+    """)
+    List<ProductBriefResponse> findByBriefsByIds(@Param("ids") Collection<Long> ids);
+
 
     @Override
     @Query(

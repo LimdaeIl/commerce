@@ -2,7 +2,6 @@ package com.friday.commerce.core.web.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties.Http;
 import org.springframework.http.HttpStatus;
 
 
@@ -16,7 +15,7 @@ public enum AppErrorCode implements ErrorCode {
     GATEWAY_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "공통: 게이트웨이 응답 시간이 초과되었습니다."),
     DEPENDENCY_FAILURE(HttpStatus.BAD_GATEWAY, "공통: 외부/하위 시스템 연동에 실패했습니다."),
     IO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "공통: 입출력 처리 중 오류가 발생했습니다."),
-    REQUEST_CONTEXT_NOT_FOUND(HttpStatus.NOT_FOUND,"공통: 요청 컨텍스트를 찾을 수 없습니다."),
+    REQUEST_CONTEXT_NOT_FOUND(HttpStatus.NOT_FOUND, "공통: 요청 컨텍스트를 찾을 수 없습니다."),
 
     // 요청/형식/프로토콜
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "공통: 잘못된 입력입니다."),

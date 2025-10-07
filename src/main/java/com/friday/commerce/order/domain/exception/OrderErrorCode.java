@@ -21,10 +21,10 @@ public enum OrderErrorCode implements ErrorCode {
 
     // 주문 상품(라인)
     ORDER_ITEM_INVALID(HttpStatus.BAD_REQUEST, "주문: 주문 상품 정보가 올바르지 않습니다."),
+    ORDER_ITEMS_INVALID(HttpStatus.BAD_REQUEST, "주문: 주문 상품들의 정보가 올바르지 않습니다. "),
     ORDER_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "주문: 주문 상품을 찾을 수 없습니다."),
     QUANTITY_INVALID(HttpStatus.BAD_REQUEST, "주문: 수량이 올바르지 않습니다."),
     INVALID_AMOUNT_RANGE(HttpStatus.BAD_REQUEST, "주문: 전체 금액이 올바르지 않습니다."),
-
     // 배송지
     ADDRESS_INVALID(HttpStatus.BAD_REQUEST, "주문: 배송지 정보가 올바르지 않습니다."),
 
