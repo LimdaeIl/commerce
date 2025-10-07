@@ -23,7 +23,7 @@ public class OrderController {
 
     private final OrderUseCase orderUseCase;
 
-    @RequireRole({UserRole.USER, UserRole.ADMIN, UserRole.ADMIN})
+    @RequireRole({UserRole.ADMIN, UserRole.SELLER, UserRole.USER})
     @PostMapping
     public ResponseEntity<CreateOrderResponse> createOrder(
             @Valid @RequestBody CreateOrderRequest request,

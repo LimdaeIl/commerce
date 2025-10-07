@@ -4,7 +4,6 @@ package com.friday.commerce.order.domain.exception;
 import com.friday.commerce.core.web.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties.Http;
 import org.springframework.http.HttpStatus;
 
 @Getter

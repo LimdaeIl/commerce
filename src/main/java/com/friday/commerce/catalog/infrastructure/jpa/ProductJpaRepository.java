@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ProductJpaRepository extends JpaRepository<Product, Long>, ProductRepository {
 
+    @Override
     @Query("""
         select p from Product p
         where p.productId in :ids
