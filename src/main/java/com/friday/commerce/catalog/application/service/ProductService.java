@@ -127,6 +127,7 @@ public class ProductService implements ProductUseCase {
         return PageResponse.from(mapped);
     }
 
+    @Transactional
     @Override
     public GetProductResponse increaseStock(Long productId, IncreaseStockRequest request) {
         Product product = findProductById(productId);
@@ -156,6 +157,33 @@ public class ProductService implements ProductUseCase {
     @Override
     public GetProductResponse getProduct(Long productId) {
         Product product = findProductById(productId);
+        return GetProductResponse.of(product);
+    }
+
+    @Transactional
+    @Override
+    public GetProductResponse statusDraft(Long productId, CurrentUserInfo info) {
+        Product product = findProductById(productId);
+        product.draft(info.userId());
+
+        return GetProductResponse.of(product);
+    }
+
+    @Transactional
+    @Override
+    public GetProductResponse statusPublished(Long productId, CurrentUserInfo info) {
+        Product product = findProductById(productId);
+        product.publish(info.userId());
+
+        return GetProductResponse.of(product);
+    }
+
+    @Transactional
+    @Override
+    public GetProductResponse statusArchived(Long productId, CurrentUserInfo info) {
+        Product product = findProductById(productId);
+        product.archive(info.userId());
+
         return GetProductResponse.of(product);
     }
 }

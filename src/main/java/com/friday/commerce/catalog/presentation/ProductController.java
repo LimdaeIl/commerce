@@ -129,7 +129,48 @@ public class ProductController {
                 .body(response);
     }
 
-    // 상품 상태 변경
+    // 상품 상태 미공개
+    @RequireRole({UserRole.ADMIN, UserRole.SELLER})
+    @PatchMapping("/{productId}/status/draft")
+    public ResponseEntity<GetProductResponse> statusDraft(
+            @PathVariable Long productId,
+            @CurrentUser CurrentUserInfo info
+    ) {
+        GetProductResponse response = productUseCase.statusDraft(productId, info);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+
+    // 상품 상태 공개
+    @RequireRole({UserRole.ADMIN, UserRole.SELLER})
+    @PatchMapping("/{productId}/published")
+    public ResponseEntity<GetProductResponse> statusPublished(
+            @PathVariable Long productId,
+            @CurrentUser CurrentUserInfo info
+    ) {
+        GetProductResponse response = productUseCase.statusPublished(productId, info);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    // 상품 상태 보관됨
+    @RequireRole({UserRole.ADMIN, UserRole.SELLER})
+    @PatchMapping("/{productId}/archived")
+    public ResponseEntity<GetProductResponse> statusArchived(
+            @PathVariable Long productId,
+            @CurrentUser CurrentUserInfo info
+    ) {
+        GetProductResponse response = productUseCase.statusArchived(productId, info);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
 
     // 상품 수정
 

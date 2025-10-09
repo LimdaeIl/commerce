@@ -27,4 +27,10 @@ public interface ProductUseCase {
     GetProductResponse delete(Long productId, CurrentUserInfo info);
 
     GetProductResponse getProduct(Long productId);
+
+    GetProductResponse statusDraft(Long productId, CurrentUserInfo info);
+
+    GetProductResponse statusPublished(Long productId, CurrentUserInfo info);
+
+    GetProductResponse statusArchived(Long productId, CurrentUserInfo info);
 }
