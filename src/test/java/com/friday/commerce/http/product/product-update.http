@@ -1,0 +1,165 @@
+@baseUrl = http://localhost:10000
+
+### @name SignUp_Success
+# 정상 회원가입 시나리오
+POST {{baseUrl}}/api/v1/auth/sign-up
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "Aa!23456",
+  "username": "앨리스123",
+  "agreement": {
+    "termsOfService": true,
+    "privacy": true,
+    "marketing": true
+  },
+  "address": {
+    "zipCode": "06236",
+    "addressLine1": "서울시 강남구 테헤란로 123",
+    "addressLine2": "OO빌딩 5층",
+    "city": "서울",
+    "state": "강남구"
+  }
+}
+
+
+### 로그인 성공 시나리오
+POST http://localhost:10000/api/v1/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "Aa!23456"
+}
+
+> {%
+  client.global.set("userId", response.body.userId.toFixed(0))
+  client.global.set("at", response.body.at)
+  client.global.set("rt", response.body.rt)
+%}
+
+### 카테고리 생성(startParentId, maxDepthOverride: null)
+POST {{baseUrl}}/api/v1/categories
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+  "path": "여성/상의",
+  "delimiter": "/"
+}
+
+### 상품 생성
+POST {{baseUrl}}/api/v1/products
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+  "title": "맨투맨 기모 맨즈",
+  "content": "도톰한 기모 맨투맨 티셔츠입니다.",
+  "categoryIds": [
+    6233678120226816,
+    6233678195724288,
+    6233678237667328
+  ],
+  "skus": {
+    "price": 29900,
+    "stock": 100
+  },
+  "images": [
+    {
+      "imageUrl": "https://cdn.example.com/img/mtm1.jpg",
+      "caption": "정면",
+      "sortOrder": 0
+    },
+    {
+      "imageUrl": "https://cdn.example.com/img/mtm2.jpg",
+      "caption": "측면",
+      "sortOrder": 1
+    }
+  ]
+}
+
+> {%
+  client.global.set("productId", response.body.productId.toFixed(0))
+%}
+
+### 상품 전체 수정
+PATCH http://localhost:10000/api/v1/products/{{productId}}
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+  "title": "테스트 상품 - 수정됨",
+  "content": "수정된 상품 상세 설명입니다.",
+  "status": "PUBLISHED",
+  "categoryIds": [
+    6233841731637248,
+    6233841773580288
+  ],
+  "price": 1000,
+  "stock": 30,
+  "images": [
+    {
+      "imageUrl": "https://cdn.test.com/products/1/main.jpg",
+      "caption": "메인 이미지",
+      "sortOrder": 0
+    },
+    {
+      "imageUrl": "https://cdn.test.com/products/1/detail.jpg",
+      "caption": "상세 이미지",
+      "sortOrder": 1
+    }
+  ]
+}
+
+### 상품 일부 필드만 수정 (부분 업데이트)
+PATCH http://localhost:10000/api/v1/products/{{productId}}
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+  "price": 19900,
+  "stock": 100
+}
+
+
+### 상품 이미지 전부 교체
+PATCH http://localhost:10000/api/v1/products/{{productId}}
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+  "images": [
+    {
+      "imageUrl": "https://cdn.test.com/products/1/new_main.jpg",
+      "caption": "새 메인 이미지",
+      "sortOrder": 0
+    },
+    {
+      "imageUrl": "https://cdn.test.com/products/1/new_detail.jpg",
+      "caption": "새 상세 이미지"
+    }
+  ]
+}
+
+### 상품 상태 및 카테고리만 수정
+PATCH http://localhost:10000/api/v1/products/{{productId}}
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+  "status": "ARCHIVED",
+  "categoryIds": [301, 302, 303]
+}
+
+### 상품 조회(모든 조건 혼합)
+GET http://localhost:10000/api/v1/products
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+
+}
