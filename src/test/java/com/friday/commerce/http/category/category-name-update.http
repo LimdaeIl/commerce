@@ -116,3 +116,14 @@ Authorization: Bearer {{at}}
 {
 
 }
+
+### 카테고리명 수정
+PATCH {{baseUrl}}/api/v1/categories/5970646181875712/name
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+  "name": "수정된 카테고리"
+}
+
+

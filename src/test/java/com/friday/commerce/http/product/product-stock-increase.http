@@ -70,7 +70,11 @@ Authorization: Bearer {{at}}
 {
   "title": "맨투맨 기모 맨즈",
   "content": "도톰한 기모 맨투맨 티셔츠입니다.",
-  "categoryIds": [4468712547553280, 4468712627245056, 4468712660799488],
+  "categoryIds": [
+    5983137259589632,
+    5983137330892800,
+    5983137368641536
+  ],
   "skus": {
     "price": 29900,
     "stock": 100
@@ -91,7 +95,7 @@ Authorization: Bearer {{at}}
 
 
 ### 상품 수량 증가
-PATCH http://localhost:10000/api/v1/products/4468806600626176/4468806600626177/increase
+PATCH http://localhost:10000/api/v1/products/5983164640006144/increase
 Content-Type: application/json
 Authorization: Bearer {{at}}
 

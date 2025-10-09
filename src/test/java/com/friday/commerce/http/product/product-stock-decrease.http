@@ -90,8 +90,8 @@ Authorization: Bearer {{at}}
 }
 
 
-### 상품 수량 증가
-PATCH http://localhost:10000/api/v1/products/4474482827726848/4474482827726849/decrease
+### 상품 수량 감소
+PATCH http://localhost:10000/api/v1/products/5983164640006144/decrease
 Content-Type: application/json
 Authorization: Bearer {{at}}
 
