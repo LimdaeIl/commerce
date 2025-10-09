@@ -8,7 +8,6 @@ import com.friday.commerce.catalog.application.dto.product.response.GetAllProduc
 import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.core.security.model.CurrentUserInfo;
 import com.friday.commerce.core.web.response.PageResponse;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 
 public interface ProductUseCase {
@@ -24,6 +23,7 @@ public interface ProductUseCase {
     );
 
     GetProductResponse increaseStock(Long productId, IncreaseStockRequest request);
+
     GetProductResponse decreaseStock(Long productId, DecreaseStockRequest request);
 
     GetProductResponse delete(Long productId, CurrentUserInfo info);
@@ -36,5 +36,6 @@ public interface ProductUseCase {
 
     GetProductResponse statusArchived(Long productId, CurrentUserInfo info);
 
-    GetProductResponse updateProduct(Long productId, CurrentUserInfo info, UpdateProductRequest request);
+    GetProductResponse updateProduct(Long productId, CurrentUserInfo info,
+            UpdateProductRequest request);
 }
