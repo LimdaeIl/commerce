@@ -89,8 +89,80 @@ Authorization: Bearer {{at}}
   ]
 }
 
-### 상품 조회
+### 상품 조회(전체)
 GET http://localhost:10000/api/v1/products
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+
+}
+
+### 상품 조회(상품 이름)
+GET http://localhost:10000/api/v1/products?productName=맨투맨
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+
+}
+
+### 상품 조회(상품 이름으로 검색)
+GET http://localhost:10000/api/v1/products?productName=맨투맨
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+
+}
+
+### 상품 조회(특정 카테고리 조회)
+GET http://localhost:10000/api/v1/products?categoryId=5977009092038656
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+
+}
+
+### 상품 조회(가격 범위 지정)
+GET http://localhost:10000/api/v1/products?categoryId=5977009092038656
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+
+}
+
+### 상품 조회(이름 + 가격 범위 검색)
+GET http://localhost:10000/api/v1/products?productName=맨투맨&minPrice=500&maxPrice=150000
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+
+}
+
+### 상품 조회(카테고리 + 가격 범위 + 정렬)
+GET http://localhost:10000/api/v1/products?categoryId=5&minPrice=10000&maxPrice=20000&sort=price,asc
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+
+}
+
+### 상품 조회(페이징 적용)
+GET http://localhost:10000/api/v1/products?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{at}}
+
+{
+
+}
+
+### 상품 조회(모든 조건 혼합)
+GET http://localhost:10000/api/v1/products?productName=맨투맨&categoryId=5977009092038656&minPrice=10000&maxPrice=400000&page=0&size=20&sort=createdAt,desc
 Content-Type: application/json
 Authorization: Bearer {{at}}
 

@@ -210,7 +210,7 @@ class UserService implements AuthUseCase, UserUseCase {
     @Transactional
     @Override
     public SignUpResponse signUp(SignUpRequest request) {
-        existsUserByEmail(request.getEmail());
+        existsUserByEmail(request.email());
         verifyAgreement(request);
 
         UserAgreement userAgreement = UserAgreement.create(
@@ -228,9 +228,9 @@ class UserService implements AuthUseCase, UserUseCase {
 
         User user = User.create(
                 snowflake.nextId(),
-                request.getEmail(),
-                passwordEncoder.encode(request.getPassword()),
-                request.getUsername(),
+                request.email(),
+                passwordEncoder.encode(request.password()),
+                request.username(),
                 userAgreement,
                 userAddress
         );

@@ -88,7 +88,7 @@ Authorization: Bearer {{at}}
 }
 
 ### 카테고리 삭제
-DELETE {{baseUrl}}/api/v1/categories/4062598412636160
+DELETE {{baseUrl}}/api/v1/categories/5970646286733312
 Content-Type: application/json
 Authorization: Bearer {{at}}
 

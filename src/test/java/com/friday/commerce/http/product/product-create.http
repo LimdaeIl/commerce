@@ -51,17 +51,6 @@ Authorization: Bearer {{at}}
   "delimiter": "/"
 }
 
-### 카테고리 생성(maxDepthOverride: null)
-POST {{baseUrl}}/api/v1/categories
-Content-Type: application/json
-Authorization: Bearer {{at}}
-
-{
-  "path": "셔츠/린넨",
-  "delimiter": "/",
-  "startParentId": 4468712660799488
-}
-
 ### 상품 생성
 POST {{baseUrl}}/api/v1/products
 Content-Type: application/json
@@ -70,7 +59,11 @@ Authorization: Bearer {{at}}
 {
   "title": "맨투맨 기모 맨즈",
   "content": "도톰한 기모 맨투맨 티셔츠입니다.",
-  "categoryIds": [4468712547553280, 4468712627245056, 4468712660799488],
+  "categoryIds": [
+    5977009092038656,
+    5977009175924736,
+    5977009213673472
+  ],
   "skus": {
     "price": 29900,
     "stock": 100

@@ -58,5 +58,5 @@ Authorization: Bearer {{at}}
 {
   "newEmail": "optional94@naver.com",
   "rt": "{{rt}}",
-  "code": 393622
+  "code": 513169
 }
