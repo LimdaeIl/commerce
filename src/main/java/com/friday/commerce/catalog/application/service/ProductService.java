@@ -4,6 +4,7 @@ package com.friday.commerce.catalog.application.service;
 import com.friday.commerce.catalog.application.dto.product.request.CreateProductRequest;
 import com.friday.commerce.catalog.application.dto.product.request.DecreaseStockRequest;
 import com.friday.commerce.catalog.application.dto.product.request.IncreaseStockRequest;
+import com.friday.commerce.catalog.application.dto.product.request.UpdateProductRequest;
 import com.friday.commerce.catalog.application.dto.product.response.GetAllProductsResponse;
 import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.catalog.application.usecase.ProductUseCase;
@@ -12,6 +13,7 @@ import com.friday.commerce.catalog.domain.entity.Product;
 import com.friday.commerce.catalog.domain.entity.ProductCategory;
 import com.friday.commerce.catalog.domain.entity.ProductImage;
 import com.friday.commerce.catalog.domain.entity.ProductSku;
+import com.friday.commerce.catalog.domain.entity.ProductStatus;
 import com.friday.commerce.catalog.domain.exception.ProductErrorCode;
 import com.friday.commerce.catalog.domain.exception.ProductException;
 import com.friday.commerce.catalog.domain.repository.CategoryRepository;
@@ -185,5 +187,137 @@ public class ProductService implements ProductUseCase {
         product.archive(info.userId());
 
         return GetProductResponse.of(product);
+    }
+
+    @Transactional
+    @Override
+    public GetProductResponse updateProduct(
+            Long productId,
+            CurrentUserInfo info,
+            UpdateProductRequest req
+    ) {
+        Product product = findProductById(productId);
+        boolean changed = false;
+
+        // 1) 본문(제목/내용)
+        changed |= applyTitleAndContent(product, info.userId(), req.title(), req.content());
+
+        // 2) 상태
+        changed |= applyStatus(product, info.userId(), req.status());
+
+        // 3) 카테고리 전체 교체
+        changed |= applyCategories(product, info.userId(), req.categoryIds());
+
+        // 4) SKU(가격/재고)
+        changed |= applySku(product, info.userId(), req.price(), req.stock());
+
+        // 5) 이미지 전체 교체
+        changed |= applyImages(product, info.userId(), req.images());
+
+        // 변경 없더라도 최신 상태 반환(클라 일관성)
+        return GetProductResponse.of(product);
+    }
+
+    private boolean applyTitleAndContent(Product product, Long userId, String title,
+            String content) {
+        boolean changed = false;
+        if (title != null) {
+            product.updateTitle(title, userId); // 내부에서 trim/blank/len 검증 + 감사 갱신
+            changed = true;
+        }
+        if (content != null) {
+            product.updateContent(content, userId); // 내부에서 trim/blank 검증 + 감사 갱신
+            changed = true;
+        }
+        return changed;
+    }
+
+    private boolean applyStatus(Product product, Long userId, ProductStatus status) {
+        if (status == null) {
+            return false;
+        }
+        if (product.getStatus() == status) {
+            return false; // 동일 상태면 예외 대신 미변경 처리
+        }
+        product.changeStatus(status, userId); // 내부에서 상태 전이 검증 + 감사 갱신
+        return true;
+    }
+
+    private boolean applyCategories(Product product, Long userId, List<Long> categoryIds) {
+        if (categoryIds == null) {
+            return false; // 미변경
+        }
+
+        // 비즈니스 정책: 최소 1개 필수 (허용하지 않으면 예외)
+        if (categoryIds.isEmpty()) {
+            throw new ProductException(ProductErrorCode.CATEGORY_NOT_FOUND);
+        }
+
+        // 중복 제거 + 입력 순서 유지
+        java.util.LinkedHashSet<Long> distinct = new java.util.LinkedHashSet<>(categoryIds);
+        List<Long> ids = new java.util.ArrayList<>(distinct);
+
+        List<Category> categories = categoryRepository.findAllByCategoryIdInAndDeletedAtIsNull(ids);
+        if (categories.size() != ids.size()) {
+            throw new ProductException(ProductErrorCode.CATEGORY_NOT_FOUND);
+        }
+
+        // 링크 재구성
+        List<ProductCategory> links = new java.util.ArrayList<>(categories.size());
+        for (Category c : categories) {
+            links.add(ProductCategory.link(snowflake.nextId(), product, c));
+        }
+
+        // 변경 감지: 기존과 동일하면 스킵(선택) — 비용 대비 효과 고려
+        // 간단히 전체 교체 후 touch
+        product.replaceCategories(links);
+        product.touch(userId);
+        return true;
+    }
+
+    private boolean applySku(Product product, Long userId, Long price, Long stock) {
+        if (price == null && stock == null) {
+            return false; // 미변경
+        }
+
+        ProductSku current = product.getProductSku();
+        if (current == null) {
+            throw new ProductException(ProductErrorCode.SKU_NOT_FOUND);
+        }
+
+        long newPrice = (price != null) ? price : current.getPrice();
+        long newStock = (stock != null) ? stock : current.getStock();
+
+        boolean different = (newPrice != current.getPrice()) || (newStock != current.getStock());
+        if (!different) {
+            return false;
+        }
+
+        ProductSku newSku = ProductSku.create(snowflake.nextId(), newPrice, newStock);
+        product.setSku(newSku);      // 양방향 / orphanRemoval 처리
+        product.touch(userId);
+        return true;
+    }
+
+    private boolean applyImages(Product product, Long userId,
+            List<UpdateProductRequest.Image> images) {
+        if (images == null) {
+            return false; // 미변경
+        }
+
+        // []: 모두 삭제, 값 있으면 교체
+        List<ProductImage> newImages = new java.util.ArrayList<>(images.size());
+        for (int i = 0; i < images.size(); i++) {
+            var v = images.get(i);
+            int sort = v.sortOrder() != null ? Math.max(0, v.sortOrder()) : i; // 음수 방지
+            String caption =
+                    (v.caption() == null || v.caption().isBlank()) ? null : v.caption().trim();
+            ProductImage img = ProductImage.create(snowflake.nextId(), null, v.imageUrl(), caption,
+                    sort);
+            newImages.add(img);
+        }
+        product.replaceImages(newImages);
+        product.touch(userId);
+        return true;
     }
 }

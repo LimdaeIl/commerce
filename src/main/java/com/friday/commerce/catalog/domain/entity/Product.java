@@ -205,4 +205,53 @@ public class Product {
         this.updatedAt = LocalDateTime.now();
         this.updatedBy = userId;
     }
+
+    public void updateTitle(String newTitle, Long userId) {
+        if (newTitle == null) {
+            return;
+        }
+        String t = newTitle.trim();
+        if (t.isBlank()) {
+            throw new ProductException(ProductErrorCode.PRODUCT_TITLE_EMPTY);
+        }
+        if (t.length() > 150) {
+            throw new ProductException(ProductErrorCode.PRODUCT_TITLE_LENGTH_EXCEEDED);
+        }
+        this.title = t;
+        this.updatedAt = java.time.LocalDateTime.now();
+        this.updatedBy = userId;
+    }
+
+    public void updateContent(String newContent, Long userId) {
+        if (newContent == null) {
+            return;
+        }
+        String c = newContent.trim();
+        if (c.isBlank()) {
+            throw new ProductException(ProductErrorCode.PRODUCT_CONTENT_EMPTY);
+        }
+        this.content = c;
+        this.updatedAt = java.time.LocalDateTime.now();
+        this.updatedBy = userId;
+    }
+
+    public void changeStatus(ProductStatus target, Long userId) {
+        if (target == null || target == this.status) {
+            return;
+        }
+        switch (target) {
+            case DRAFT -> this.draft(userId);
+            case PUBLISHED -> this.publish(userId);
+            case ARCHIVED -> this.archive(userId);
+        }
+        this.updatedAt = java.time.LocalDateTime.now();
+        this.updatedBy = userId;
+    }
+
+    public void touch(Long userId) {
+        this.updatedAt = LocalDateTime.now();
+        this.updatedBy = userId;
+    }
+
+
 }

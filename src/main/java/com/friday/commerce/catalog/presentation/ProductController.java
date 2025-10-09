@@ -3,6 +3,7 @@ package com.friday.commerce.catalog.presentation;
 import com.friday.commerce.catalog.application.dto.product.request.CreateProductRequest;
 import com.friday.commerce.catalog.application.dto.product.request.DecreaseStockRequest;
 import com.friday.commerce.catalog.application.dto.product.request.IncreaseStockRequest;
+import com.friday.commerce.catalog.application.dto.product.request.UpdateProductRequest;
 import com.friday.commerce.catalog.application.dto.product.response.GetAllProductsResponse;
 import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.catalog.application.usecase.ProductUseCase;
@@ -173,5 +174,14 @@ public class ProductController {
     }
 
     // 상품 수정
-
+    @RequireRole({UserRole.ADMIN, UserRole.SELLER})
+    @PatchMapping("/{productId}")
+    public ResponseEntity<GetProductResponse> updateProduct(
+            @PathVariable Long productId,
+            @CurrentUser CurrentUserInfo info,
+            @RequestBody @Valid UpdateProductRequest request
+    ) {
+        GetProductResponse response = productUseCase.updateProduct(productId, info, request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

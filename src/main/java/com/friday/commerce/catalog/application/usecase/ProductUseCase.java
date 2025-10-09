@@ -3,10 +3,12 @@ package com.friday.commerce.catalog.application.usecase;
 import com.friday.commerce.catalog.application.dto.product.request.CreateProductRequest;
 import com.friday.commerce.catalog.application.dto.product.request.DecreaseStockRequest;
 import com.friday.commerce.catalog.application.dto.product.request.IncreaseStockRequest;
+import com.friday.commerce.catalog.application.dto.product.request.UpdateProductRequest;
 import com.friday.commerce.catalog.application.dto.product.response.GetAllProductsResponse;
 import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.core.security.model.CurrentUserInfo;
 import com.friday.commerce.core.web.response.PageResponse;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 
 public interface ProductUseCase {
@@ -33,4 +35,6 @@ public interface ProductUseCase {
     GetProductResponse statusPublished(Long productId, CurrentUserInfo info);
 
     GetProductResponse statusArchived(Long productId, CurrentUserInfo info);
+
+    GetProductResponse updateProduct(Long productId, CurrentUserInfo info, UpdateProductRequest request);
 }
