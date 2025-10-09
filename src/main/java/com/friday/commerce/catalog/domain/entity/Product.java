@@ -151,6 +151,15 @@ public class Product {
         }
     }
 
+    public void draft(Long userId) {
+        if (this.status == ProductStatus.DRAFT) {
+            throw new ProductException(ProductErrorCode.PRODUCT_STATUS_SAME_BEFORE);
+        }
+        this.status = ProductStatus.DRAFT;
+        this.updatedAt = LocalDateTime.now();
+        this.updatedBy = userId;
+    }
+
     public void publish(Long userId) {
         if (this.status == ProductStatus.PUBLISHED) {
             throw new ProductException(ProductErrorCode.PRODUCT_STATUS_SAME_BEFORE);
