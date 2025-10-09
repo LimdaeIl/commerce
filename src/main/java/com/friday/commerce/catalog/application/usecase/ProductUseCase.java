@@ -3,6 +3,7 @@ package com.friday.commerce.catalog.application.usecase;
 import com.friday.commerce.catalog.application.dto.product.request.CreateProductRequest;
 import com.friday.commerce.catalog.application.dto.product.request.DecreaseStockRequest;
 import com.friday.commerce.catalog.application.dto.product.request.IncreaseStockRequest;
+import com.friday.commerce.catalog.application.dto.product.request.UpdateProductRequest;
 import com.friday.commerce.catalog.application.dto.product.response.GetAllProductsResponse;
 import com.friday.commerce.catalog.application.dto.product.response.GetProductResponse;
 import com.friday.commerce.core.security.model.CurrentUserInfo;
@@ -22,6 +23,7 @@ public interface ProductUseCase {
     );
 
     GetProductResponse increaseStock(Long productId, IncreaseStockRequest request);
+
     GetProductResponse decreaseStock(Long productId, DecreaseStockRequest request);
 
     GetProductResponse delete(Long productId, CurrentUserInfo info);
@@ -33,4 +35,7 @@ public interface ProductUseCase {
     GetProductResponse statusPublished(Long productId, CurrentUserInfo info);
 
     GetProductResponse statusArchived(Long productId, CurrentUserInfo info);
+
+    GetProductResponse updateProduct(Long productId, CurrentUserInfo info,
+            UpdateProductRequest request);
 }
