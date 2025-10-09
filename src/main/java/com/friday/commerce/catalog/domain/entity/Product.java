@@ -231,8 +231,6 @@ public class Product {
             throw new ProductException(ProductErrorCode.PRODUCT_CONTENT_EMPTY);
         }
         this.content = c;
-        this.updatedAt = java.time.LocalDateTime.now();
-        this.updatedBy = userId;
     }
 
     public void changeStatus(ProductStatus target, Long userId) {
