@@ -119,15 +119,15 @@ public class ProductController {
     // 상품 삭제
     @RequireRole({UserRole.ADMIN, UserRole.SELLER})
     @DeleteMapping("/{productId}/delete")
-    public ResponseEntity<GetProductResponse> decreaseStock(
+    public ResponseEntity<Void> decreaseStock(
             @PathVariable Long productId,
             @CurrentUser CurrentUserInfo info
     ) {
-        GetProductResponse response = productUseCase.delete(productId, info);
+        productUseCase.delete(productId, info);
 
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
+                .noContent()
+                .build();
     }
 
     // 상품 상태 미공개

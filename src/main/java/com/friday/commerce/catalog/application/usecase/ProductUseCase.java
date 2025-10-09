@@ -26,7 +26,7 @@ public interface ProductUseCase {
 
     GetProductResponse decreaseStock(Long productId, DecreaseStockRequest request);
 
-    GetProductResponse delete(Long productId, CurrentUserInfo info);
+    void delete(Long productId, CurrentUserInfo info);
 
     GetProductResponse getProduct(Long productId);
 
