@@ -35,7 +35,7 @@ public class PaymentController {
     @Operation(
             summary = "결제 확정",
             description = "프론트에서 받은 `paymentKey`와 `orderId`로 결제를 확정합니다.",
-            requestBody = @RequestBody(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
                     content = @Content(
                             mediaType = "application/json",
