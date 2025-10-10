@@ -9,43 +9,6 @@ volumes:
   redis-data:
 
 services:
-  mysql:
-    image: mysql:8.0.43
-    container_name: friday-mysql
-    restart: unless-stopped
-    ports:
-      - "3333:3306"              # ← application.yml 의 localhost:3333 과 일치
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-commerce}
-      MYSQL_USER: ${MYSQL_USER:-local}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-local}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-      TZ: Asia/Seoul
-    command: [
-      "--disable-log-bin",                # dev: binlog 끔(디스크 절약)
-      "--character-set-server=utf8mb4",
-      "--collation-server=utf8mb4_0900_ai_ci",
-      "--default-time-zone=+09:00",       # tz 테이블 없이도 고정
-      "--skip-name-resolve",              # 역DNS 비활성화 → 접속 지연 방지
-      "--max-connections=150",
-      "--innodb-buffer-pool-size=256M",
-      "--innodb-log-file-size=128M"
-    ]
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u${MYSQL_USER:-local} -p${MYSQL_PASSWORD:-local} --silent"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-      start_period: 15s
-    volumes:
-      - mysql-data:/var/lib/mysql
-      # 현재 파일 위치 = 프로젝트루트/docker/mysql/conf.d/my.cnf
-      - ./docker/mysql/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf:ro
-      # 초기 스크립트가 있으면 아래 주석 해제
-      # - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
-    networks:
-      - friday-net
-
   redis:
     image: redis:7.2-alpine
     container_name: friday-redis
