@@ -30,10 +30,10 @@ spring:
       enabled: never
 
   datasource:
-    url: jdbc:mysql://${RDS_ENDPOINT:localhost}:3306/commerce?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&cachePrepStmts=true&prepStmtCacheSize=250&prepStmtCacheSqlLimit=2048&useServerPrepStmts=true
+    url: jdbc:mysql://${RDS_ENDPOINT}:3306/commerce?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&cachePrepStmts=true&prepStmtCacheSize=250&prepStmtCacheSqlLimit=2048&useServerPrepStmts=true
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${RDS_USERNAME:local}
-    password: ${RDS_PASSWORD:local}
+    username: ${RDS_USERNAME}
+    password: ${RDS_PASSWORD}
 
     hikari:
       pool-name: HikariPool-Prod
