@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <link rel="icon" href="/favicon.ico">
+  <meta charset="utf-8"/>
+  <title>결제 테스트</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <!-- Toss JS -->
+  <script src="https://js.tosspayments.com/v1" defer></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Apple SD Gothic Neo, Malgun Gothic, Arial, sans-serif;
+      padding: 24px
+    }
+
+    .card {
+      max-width: 520px;
+      margin: 0 auto;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .04)
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px 16px;
+      border: 0;
+      border-radius: 10px;
+      background: #4f46e5;
+      color: #fff;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer
+    }
+
+    .btn:disabled {
+      opacity: .6;
+      cursor: not-allowed
+    }
+
+    .muted {
+      color: #666
+    }
+
+    .err {
+      margin-top: 12px;
+      color: #b91c1c;
+      white-space: pre-wrap
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h2>주문 결제</h2>
+  <div class="row"><span class="muted">주문번호</span><strong id="orderIdTxt">-</strong></div>
+  <div class="row"><span class="muted">결제금액</span><strong id="amountTxt">-</strong></div>
+  <button id="pay" class="btn" disabled>결제하기</button>
+  <div id="log" class="err"></div>
+</div>
+
+<script>
+  function log(msg) {
+    console.error(msg);
+    document.getElementById('log').textContent = String(msg);
+  }
+
+  const won = n => Number(n).toLocaleString('ko-KR') + '원';
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    const qp = new URLSearchParams(location.search);
+    const orderId = qp.get('orderId');
+    if (!orderId) {
+      log('orderId 파라미터가 없습니다.');
+      return;
+    }
+
+    const orderIdTxt = document.getElementById('orderIdTxt');
+    const amountTxt = document.getElementById('amountTxt');
+    const payBtn = document.getElementById('pay');
+    orderIdTxt.textContent = orderId;
+
+    // (A) 주문 요약 JSON을 서버에서 조회
+    try {
+      // 필요에 따라 Authorization 헤더 추가(아래 보안 섹션 참고)
+      const brief = await fetch(`/api/v1/orders/${orderId}/brief`).then(r => {
+        if (!r.ok) {
+          throw new Error('주문 요약 조회 실패');
+        }
+        return r.json();
+      });
+      const amount = brief.totalAmount;         // 서버 진실값
+      amountTxt.textContent = won(amount);
+
+      // Toss SDK 준비
+      if (typeof window.TossPayments === 'undefined') {
+        log('TossPayments SDK 로드 실패');
+        return;
+      }
+      const tossPayments = TossPayments('test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq');
+      const redirectBase = `${location.origin}/api/v1/payments`;
+
+      payBtn.disabled = false;
+      payBtn.onclick = async () => {
+        try {
+          await tossPayments.requestPayment('카드', {
+            amount,                      // URL이 아닌 "서버 금액"
+            orderId,
+            orderName: `주문 #${orderId}`,
+            successUrl: `${redirectBase}/success`,
+            failUrl: `${redirectBase}/fail`,
+          });
+        } catch (err) {
+          log(err?.code ? `${err.code} ${err.message}` : (err?.message || '결제창 호출 실패'));
+        }
+      };
+    } catch (e) {
+      log(e.message || e);
+    }
+  });
+</script>
+</body>
+</html>

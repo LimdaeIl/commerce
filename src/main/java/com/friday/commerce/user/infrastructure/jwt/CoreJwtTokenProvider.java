@@ -1,0 +1,56 @@
+package com.friday.commerce.user.infrastructure.jwt;
+
+import com.friday.commerce.core.security.jwt.JwtProvider;
+import com.friday.commerce.core.security.model.UserRole;
+import com.friday.commerce.user.domain.port.TokenProvider;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class CoreJwtTokenProvider implements TokenProvider {
+
+    private final JwtProvider jwtProvider;
+
+    @Override
+    public String issueAt(Long userId, UserRole role) {
+        return jwtProvider.generateAccessToken(userId, role.name());
+    }
+
+    @Override
+    public String issueRt(Long userId) {
+        return jwtProvider.generateRefreshToken(userId);
+    }
+
+    @Override
+    public String getRtJti(String token) {
+        return jwtProvider.getRtJti(token);
+    }
+
+    @Override
+    public String getAtJti(String token) {
+        return jwtProvider.getAtJti(token);
+    }
+
+    @Override
+    public long getRtTtlMs(String rt) {
+        return jwtProvider.getRtTtlMs(rt);
+    }
+
+    @Override
+    public long getAtTtlMs(String at) {
+        return jwtProvider.getAtTtlMs(at);
+    }
+
+    @Override
+    public Long getRtUserId(String rt) {
+        return jwtProvider.getRtUserId(rt);
+    }
+
+    @Override
+    public Long getAtUserId(String at) {
+        return jwtProvider.getAtUserId(at);
+    }
+
+
+}

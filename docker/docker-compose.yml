@@ -1,0 +1,43 @@
+name: friday-commerce
+
+networks:
+  friday-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
+
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: friday-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"        # spring.data.redis.host=localhost, port=6379 매칭
+    environment:
+      TZ: Asia/Seoul
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}            # ""면 인증 미사용
+      REDIS_MAXMEMORY: ${REDIS_MAXMEMORY:-512mb}     # 로컬 기본 512MB
+      REDIS_MAXMEMORY_POLICY: ${REDIS_MAXMEMORY_POLICY:-allkeys-lru}
+    command: >
+      sh -c 'exec redis-server
+             --appendonly yes
+             --appendfsync everysec
+             --save 900 1 --save 300 10 --save 60 10000
+             --maxmemory ${REDIS_MAXMEMORY:-512mb}
+             --maxmemory-policy ${REDIS_MAXMEMORY_POLICY:-allkeys-lru}
+             ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}'
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -h 127.0.0.1 -p 6379 ${REDIS_PASSWORD:+-a $REDIS_PASSWORD} ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    volumes:
+      - redis-data:/data
+      # 아직 redis.conf 파일을 만들지 않았으니 일단 주석 유지
+      # 만들었다면 위치는 ./docker/redis/redis.conf 로 맞추세요
+      # - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - friday-net
