@@ -5,8 +5,9 @@ networks:
     driver: bridge
 
 volumes:
-  mysql-data:
   redis-data:
+  prom-data:
+  grafana-data:
 
 services:
   redis:
@@ -39,5 +40,37 @@ services:
       # 아직 redis.conf 파일을 만들지 않았으니 일단 주석 유지
       # 만들었다면 위치는 ./docker/redis/redis.conf 로 맞추세요
       # - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - friday-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: friday-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom-data:/prometheus
+    # 리눅스 도커에서 host.docker.internal 사용을 위해 host-gateway 매핑
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - friday-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: friday-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      TZ: Asia/Seoul
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
     networks:
       - friday-net
