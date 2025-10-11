@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'commerce-app'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      # EC2 호스트에서 실행 중인 스프링 부트 포트 (예: 10000)
+      # 아래 compose에서 host.docker.internal → host-gateway 로 매핑함
+      - targets: ['host.docker.internal:10000']
+        labels:
+          service: commerce
