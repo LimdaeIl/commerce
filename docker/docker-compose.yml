@@ -50,7 +50,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prom-data:/prometheus
     # 리눅스 도커에서 host.docker.internal 사용을 위해 host-gateway 매핑
     extra_hosts:
