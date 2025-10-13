@@ -217,10 +217,9 @@
 | **Runtime 튜닝(예)** | G1GC, `Xmx≈1024m`, HikariCP `maxPoolSize≈20`                 |
 
 
-## 시스템 아키텍처
-
 </br> 
 
+## 시스템 아키텍처
 
 <img width="823" height="405" alt="image" src="https://github.com/user-attachments/assets/4a457547-53ca-49ed-9413-46605b80a48f" />
 
