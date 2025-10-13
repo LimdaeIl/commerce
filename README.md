@@ -1,39 +1,19 @@
 # 프라이데이 - 이커머스 서비스 <a href="https://github.com/LimdaeIl/commerce"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Spring_Boot.svg/512px-Spring_Boot.svg.png?20230616230349" align="left" width="100"></a>
 
+<!-- 프로젝트/리포 상태 -->
 [![views](https://myhits.vercel.app/api/hit/https%3A%2F%2Fgithub.com%2FLimdaeIl%2Fcommerce?color=green&label=views&size=small)](https://github.com/LimdaeIl/commerce)
 [![GitHub issues](https://img.shields.io/github/issues/LimdaeIl/commerce)](https://github.com/LimdaeIl/commerce/issues)
 [![GitHub PRs Closed](https://img.shields.io/github/issues-pr-closed/LimdaeIl/commerce)](https://github.com/LimdaeIl/commerce/pulls?q=is%3Apr+is%3Aclosed)
-![Java 21](https://img.shields.io/badge/Java-21-007396?logo=openjdk)
-[![Spring Boot 3.5.6](https://img.shields.io/badge/Spring%20Boot-3.5.6-6DB33F?logo=springboot)](https://spring.io/projects/spring-boot)
-[![Thymeleaf](https://img.shields.io/badge/Thymeleaf-3.x-005F0F?logo=thymeleaf)](https://www.thymeleaf.org/)
-[![springdoc-openapi 2.8.13](https://img.shields.io/badge/OpenAPI-springdoc%202.8.13-6BA539?logo=openapiinitiative)](https://springdoc.org/)
-[![Swagger UI](https://img.shields.io/badge/Swagger-UI-85EA2D?logo=swagger)](https://swagger.io/tools/swagger-ui/)
-[![JJWT 0.12.6](https://img.shields.io/badge/JJWT-0.12.6-000000?logo=jsonwebtokens)](https://github.com/jwtk/jjwt)
-[![Spring Security Crypto](https://img.shields.io/badge/Spring%20Security-Crypto-6DB33F?logo=springsecurity)](https://spring.io/projects/spring-security)
-[![JPA / Hibernate](https://img.shields.io/badge/JPA-Hibernate-59666C?logo=hibernate)](https://hibernate.org/)
-[![MySQL 8.0.43](https://img.shields.io/badge/MySQL-8.0.43-4479A1?logo=mysql)](https://www.mysql.com/)
-[![Redis 7.2](https://img.shields.io/badge/Redis-7.2-DC382D?logo=redis)](https://redis.io/)
-[![Micrometer](https://img.shields.io/badge/Micrometer-core-3C78D8?logo=micrometer)](https://micrometer.io/)
-[![Spring Actuator](https://img.shields.io/badge/Spring-Actuator-6DB33F?logo=spring)](https://docs.spring.io/spring-boot/docs/current/actuator-api/htmlsingle/)
-[![Gradle](https://img.shields.io/badge/Gradle-8.x-02303A?logo=gradle)](https://gradle.org/)
-[![Asciidoctor 3.3.2](https://img.shields.io/badge/Asciidoctor-3.3.2-E40046?logo=asciidoctor)](https://asciidoctor.org/)
-[![Spring REST Docs](https://img.shields.io/badge/Spring%20REST%20Docs-MockMvc-6DB33F?logo=spring)](https://docs.spring.io/spring-restdocs/docs/current/reference/html5/)
-[![JUnit 5](https://img.shields.io/badge/JUnit-5-25A162?logo=junit5)](https://junit.org/junit5/)
-[![java-dotenv 5.2.2](https://img.shields.io/badge/dotenv-5.2.2-00C7B7?logo=dotenv)](https://github.com/cdimascio/java-dotenv)
-[![Docker](https://img.shields.io/badge/Docker-Engine-2496ED?logo=docker)](https://www.docker.com/)
-[![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://docs.docker.com/compose/)
-[![mysqld-exporter 0.15.1](https://img.shields.io/badge/Prometheus-mysqld_exporter%200.15.1-E6522C?logo=prometheus)](https://github.com/prometheus/mysqld_exporter)
-[![redis_exporter 1.62.0](https://img.shields.io/badge/Prometheus-redis_exporter%201.62.0-E6522C?logo=prometheus)](https://github.com/oliver006/redis_exporter)
-![Toss Payments](https://img.shields.io/badge/Payments-Toss-0064FF)
-[![GitHub Actions](https://img.shields.io/badge/GitHub-Actions-2088FF?logo=githubactions)](https://github.com/features/actions)
-![CodeRabbit](https://img.shields.io/badge/Code%20Review-CodeRabbit-6C63FF)
+
+
+</br> 
 
 ## 프로젝트 목표
 
 - 쿠팡, 11번가, 무신사 등의 전자상거래 시스템인 이커머스 도메인을 기반으로 상품, 카테고리, 주문, 결제 등의 서비스를 이해하고,  MSA 확장을 고려한 모놀리식 아키텍처 기반의 백엔드 시스템을 구축하고 배포와 자동화가 목표인 개인 프로젝트 입니다.
 - 모놀리식 아키텍처 구조이지만, 유연한 확장성과 유지보수성을 높이기 위한 설계 구조를 갖추기 위해 도메인 주도 설계(DDD) 철학을 바탕으로 레이어드 아키텍처로 내부 도메인 패키지를 구성하고, 서로 다른 도메인의 데이터 통신을 위해 헥사고날 아키텍처(Ports/Adapters)을 채택합니다.
 
-  
+</br> 
 
 ## 기술 사항
 
@@ -46,11 +26,16 @@
 - **배포/자동화**: AWS EC2/RDS, GitHub Actions CI/CD, PR 단위 정적 리뷰(CodeRabbit)
 - **성능 최적화**: 인덱스만으로 WHERE/ORDER BY/LIMIT 해결(Backward Index Scan 활용), 대용량 오프셋 대응
 
----
+
+
+</br> 
+
+
+
 
 ## 성과
 
-### **카테고리 조회 성능 최적화로 p95 응답 시간 90% 이상 단축**
+### **1. 👕카테고리 조회 성능 최적화로 p95 응답 시간 90% 이상 단축**
 
 > 스마트한 복합 인덱스 하나로 카테고리별 상품 조회 데이터 검색, 정렬, 페이지 넘김을 동시에 해결했습니다. 
 > 그 결과, 2분 넘게 걸리던 작업을 1.5초로 단축시켜 수십 배의 성능 개선을 이뤄냈습니다.
@@ -77,9 +62,11 @@
 | **안정성**    | 사용자가 몰리면 속도 급격히 저하 | 사용량과 무관하게 **안정적인 속도** 유지  |
 | **서버 자원** | CPU/메모리 사용량 매우 높음      | 자원 사용량 **대폭 감소**, 효율성 증대    |
 
----
 
-### **'인접 리스트'와 '경로 열거' 조합으로 카테고리 트리 쿼리 p95 최대 5배 개선**
+</br> 
+
+
+### **2. 🛍️'인접 리스트'와 '경로 열거' 조합으로 카테고리 트리 쿼리 p95 최대 5배 개선**
 
 > 직계 관계는 ‘인접 리스트’로 단순하고 빠르게, 전체 하위 트리는 미리 계산된 ‘경로’로 한 번에 조회하도록 구조를 이원화하여, 
 > 복잡했던 트리 관련 API의 p95 응답 속도를 2~5배 개선했습니다.
@@ -109,9 +96,13 @@
 | **응답 속도(p95)** | 400ms ~ **1200ms**               | **120ms ~ 250ms**                      |
 
 
----
 
-### **JWT 토큰 회전 및 블랙리스트 도입으로 실시간 보안 통제 및 운영 안정성 강화**
+</br> 
+
+
+
+
+### **3. 🔑JWT 토큰 회전 및 블랙리스트 도입으로 실시간 보안 통제 및 운영 안정성 강화**
 
 > 인증 시스템의 보안 수준을 높이고 운영 효율을 개선하기 위해, JTI(JWT 고유 식별자)와 Redis를 결합한 토큰 무효화 전략 및 경로 기반의 체계적인 인증 필터를 구현했습니다.
 
@@ -144,10 +135,37 @@
 | **5. 처리**            | 검증 성공 시, 요청에 사용자 정보(ID, 역할)를 담아 컨트롤러로 전달 |
 
 
----
+</br> 
 
 
 ### 🛒 friday-commerce (Application)
+
+<!-- 애플리케이션 스택 -->
+![Java 21](https://img.shields.io/badge/Java-21-007396?logo=openjdk)
+[![Spring Boot 3.5.6](https://img.shields.io/badge/Spring%20Boot-3.5.6-6DB33F?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Thymeleaf](https://img.shields.io/badge/Thymeleaf-3.x-005F0F?logo=thymeleaf)](https://www.thymeleaf.org/)
+[![springdoc-openapi 2.8.13](https://img.shields.io/badge/OpenAPI-springdoc%202.8.13-6BA539?logo=openapiinitiative)](https://springdoc.org/)
+[![Swagger UI](https://img.shields.io/badge/Swagger-UI-85EA2D?logo=swagger)](https://swagger.io/tools/swagger-ui/)
+[![JJWT 0.12.6](https://img.shields.io/badge/JJWT-0.12.6-000000?logo=jsonwebtokens)](https://github.com/jwtk/jjwt)
+[![Spring Security Crypto](https://img.shields.io/badge/Spring%20Security-Crypto-6DB33F?logo=springsecurity)](https://spring.io/projects/spring-security)
+[![JPA / Hibernate](https://img.shields.io/badge/JPA-Hibernate-59666C?logo=hibernate)](https://hibernate.org/)
+[![MySQL 8.0.43](https://img.shields.io/badge/MySQL-8.0.43-4479A1?logo=mysql)](https://www.mysql.com/)
+[![Redis 7.2](https://img.shields.io/badge/Redis-7.2-DC382D?logo=redis)](https://redis.io/)
+[![Micrometer](https://img.shields.io/badge/Micrometer-core-3C78D8?logo=micrometer)](https://micrometer.io/)
+[![Spring Actuator](https://img.shields.io/badge/Spring-Actuator-6DB33F?logo=spring)](https://docs.spring.io/spring-boot/docs/current/actuator-api/htmlsingle/)
+[![Gradle](https://img.shields.io/badge/Gradle-8.x-02303A?logo=gradle)](https://gradle.org/)
+[![Asciidoctor 3.3.2](https://img.shields.io/badge/Asciidoctor-3.3.2-E40046?logo=asciidoctor)](https://asciidoctor.org/)
+[![Spring REST Docs](https://img.shields.io/badge/Spring%20REST%20Docs-MockMvc-6DB33F?logo=spring)](https://docs.spring.io/spring-restdocs/docs/current/reference/html5/)
+[![JUnit 5](https://img.shields.io/badge/JUnit-5-25A162?logo=junit5)](https://junit.org/junit5/)
+[![java-dotenv 5.2.2](https://img.shields.io/badge/dotenv-5.2.2-00C7B7?logo=dotenv)](https://github.com/cdimascio/java-dotenv)
+[![Docker](https://img.shields.io/badge/Docker-Engine-2496ED?logo=docker)](https://www.docker.com/)
+[![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://docs.docker.com/compose/)
+[![mysqld-exporter 0.15.1](https://img.shields.io/badge/Prometheus-mysqld_exporter%200.15.1-E6522C?logo=prometheus)](https://github.com/prometheus/mysqld_exporter)
+[![redis_exporter 1.62.0](https://img.shields.io/badge/Prometheus-redis_exporter%201.62.0-E6522C?logo=prometheus)](https://github.com/oliver006/redis_exporter)
+![Toss Payments](https://img.shields.io/badge/Payments-Toss-0064FF)
+[![GitHub Actions](https://img.shields.io/badge/GitHub-Actions-2088FF?logo=githubactions)](https://github.com/features/actions)
+![CodeRabbit](https://img.shields.io/badge/Code%20Review-CodeRabbit-6C63FF)
+
 
 | Category           | Technology                                                   |
 | ------------------ | ------------------------------------------------------------ |
@@ -170,9 +188,23 @@
 | **Payment**        | **토스 결제 API**                                            |
 | **CI/CD & Review** | **GitHub Actions**, **CodeRabbit**(PR 리뷰 자동화)           |
 
+
 ------
 
+</br> 
+
+
 ### ☁️ Infrastructure / Deployment
+
+
+<!-- 인프라/배포 스택 (추가된 배지 포함) -->
+[![AWS EC2 t3.small](https://img.shields.io/badge/AWS-EC2%20t3.small-FF9900?logo=amazonaws)](https://aws.amazon.com/ec2/)
+[![AWS RDS MySQL](https://img.shields.io/badge/AWS-RDS%20(MySQL)-527FFF?logo=amazonaws)](https://aws.amazon.com/rds/)
+[![Ubuntu LTS](https://img.shields.io/badge/Ubuntu-LTS-E95420?logo=ubuntu)](https://ubuntu.com/)
+[![Prometheus 2.54.1](https://img.shields.io/badge/Prometheus-2.54.1-E6522C?logo=prometheus)](https://prometheus.io/)
+[![Grafana 11.1.0](https://img.shields.io/badge/Grafana-11.1.0-F46800?logo=grafana)](https://grafana.com/)
+![Ports 10000/9090/3000](https://img.shields.io/badge/Ports-10000%20%7C%209090%20%7C%203000-555555)
+
 
 | Category             | Technology                                                   |
 | -------------------- | ------------------------------------------------------------ |
@@ -185,8 +217,10 @@
 | **Runtime 튜닝(예)** | G1GC, `Xmx≈1024m`, HikariCP `maxPoolSize≈20`                 |
 
 
-
 ## 시스템 아키텍처
+
+</br> 
+
 
 <img width="823" height="405" alt="image" src="https://github.com/user-attachments/assets/4a457547-53ca-49ed-9413-46605b80a48f" />
 
